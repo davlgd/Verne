@@ -1,0 +1,11 @@
+{% if page.edit_url or page.params.updated %}
+<div class="vd-meta-row">
+  {% if page.edit_url %}
+  <a class="vd-meta-edit" href="{{ page.edit_url }}" target="_blank" rel="noopener noreferrer">{{ site.params.ui.edit_label | default("Edit this page") }} <span aria-hidden="true">→</span></a>
+  {% else %}<span></span>{% endif %}
+  {% if page.params.updated %}
+  <span class="vd-meta-updated">Last updated <b>{{ page.params.updated }}</b></span>
+  {% endif %}
+</div>
+{% endif %}
+

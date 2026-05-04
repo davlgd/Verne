@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body>
+<a href="#vd-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<div class="vd-shell">
+{% include "partials/sidebar.html" %}
+  <main id="vd-main" class="vd-main vd-404" tabindex="-1">
+    <p class="vd-404-eyebrow">Error 404</p>
+    <h1 class="vd-page-title">Page not found</h1>
+    <p class="vd-page-lede">The page you were looking for doesn&rsquo;t exist on <strong>{{ site.title }}</strong> — it may have been renamed or removed.</p>
+    <div class="vd-cta-row">
+      <a class="vd-btn vd-btn--primary" href="/">
+        <span>Back to home</span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      <button type="button" class="vd-btn kbar-trigger">
+        <span>Search the docs</span>
+        <span class="vd-search-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+      </button>
+    </div>
+  </main>
+</div>
+{% include "partials/kbar.html" %}
+</body>
+</html>

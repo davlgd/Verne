@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="archives">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-shell" tabindex="-1">
+
+  <section class="vbg-archives-head">
+    <p class="vbg-eyebrow" data-archive-count>{{ site.posts | length }} posts</p>
+    <h1 class="vbg-page-title">Archives</h1>
+
+    <div class="vbg-search" role="search">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="6" cy="6" r="4.25"/><path d="M9 9l3.5 3.5" stroke-linecap="round"/></svg>
+      <label class="vbg-sr-only" for="vbg-archive-q">Search posts</label>
+      <input id="vbg-archive-q" type="search" autocomplete="off" placeholder="{{ site.params.ui.search_placeholder | default("Search posts") }}" data-archive-search>
+      <button type="button" class="vbg-search-clear" aria-label="Clear" data-archive-clear hidden>×</button>
+    </div>
+
+    <div class="vbg-filter">
+      <span class="vbg-filter-label">Filter:</span>
+      <button type="button" class="vbg-tag is-active" data-archive-tag="" aria-pressed="true">all</button>
+      {%- for t in site.tags_by_name -%}
+      <button type="button" class="vbg-tag" data-archive-tag="{{ t.name }}" aria-pressed="false">{{ t.name }}</button>
+      {%- endfor %}
+    </div>
+  </section>
+
+  <section class="vbg-archives-list" data-archive-list>
+    {%- for p in site.posts %}
+    <article class="vbg-archive-row" data-archive-row data-tags="{{ p.params.tags | join(",") }}" data-q="{{ p.title }} {{ p.params.description | default(p.description) }}" data-year="{{ p.date | format_date("2006") }}">
+      <span class="vbg-archive-date">{{ p.date | format_date("Jan 02") | lower }}</span>
+      <div class="vbg-archive-body">
+        <a class="vbg-archive-title" href="{{ p.relpermalink }}">{{ p.title }}</a>
+        <div class="vbg-tags">
+          {%- for t in p.params.tags %}<span class="vbg-tag vbg-tag--sm">{{ t }}</span>{% endfor -%}
+        </div>
+      </div>
+      <span class="vbg-archive-time">{{ p.params.read_time | default(p.reading_time) }} min</span>
+    </article>
+    {%- endfor %}
+    <p class="vbg-archive-empty" data-archive-empty hidden>no posts match.</p>
+  </section>
+
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

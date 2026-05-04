@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="home">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-shell" tabindex="-1">
+
+  <section class="vbg-hero" aria-labelledby="vbg-hero-title">
+    <p class="vbg-eyebrow">{{ site.params.tagline | default("Notes from the build pipeline") }}</p>
+    <h1 id="vbg-hero-title" class="vbg-hero-title">{{ page.title }}</h1>
+    <p class="vbg-hero-lede">{{ site.title }} is a static site generator that compiles in microseconds. This is the team blog — essays, internals, the occasional regret.</p>
+  </section>
+
+  {%- with featured = site.posts[0] %}
+  <section class="vbg-featured">
+    <a class="vbg-featured-link" href="{{ featured.relpermalink }}">
+      <div class="vbg-featured-cover vbg-cover" data-cover-hue="{{ featured.params.cover_hue | default(28) }}" aria-hidden="true">
+        <span class="vbg-cover-stripes"></span>
+        <span class="vbg-cover-label">{{ featured.params.cover_label | default("featured") }}</span>
+      </div>
+      <div class="vbg-featured-body">
+        <div class="vbg-tags">
+          {%- for t in featured.params.tags %}<span class="vbg-tag vbg-tag--sm">{{ t }}</span>{% endfor -%}
+        </div>
+        <h2 class="vbg-featured-title">{{ featured.title }}</h2>
+        <p class="vbg-featured-excerpt">{{ featured.params.description | default(featured.description) }}</p>
+        <p class="vbg-featured-meta">
+          {%- with author = site.params.authors[0] -%}
+          <span>{{ author.name }}</span>
+          {%- endwith -%}
+          <span aria-hidden="true">·</span>
+          <span>{{ featured.date | format_date("Jan 2, 2006") }}</span>
+          <span aria-hidden="true">·</span>
+          <span>{{ featured.params.read_time | default(featured.reading_time) }} min read</span>
+        </p>
+      </div>
+    </a>
+  </section>
+  {%- endwith %}
+
+  <section class="vbg-grid" aria-labelledby="vbg-recent-posts">
+    <div class="vbg-section-divider">
+      <h2 id="vbg-recent-posts" class="vbg-section-eyebrow">Recent posts</h2>
+      <span class="vbg-section-rule" aria-hidden="true"></span>
+      <a class="vbg-section-link" href="/archives/">all posts <span aria-hidden="true">→</span></a>
+    </div>
+    {%- for p in site.posts -%}
+      {% if not loop.first %}{% include "partials/post-card.html" %}{% endif %}
+    {%- endfor %}
+  </section>
+
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

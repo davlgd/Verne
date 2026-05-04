@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="error">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-shell" tabindex="-1">
+  <section class="vbg-404">
+    <p class="vbg-404-num" aria-hidden="true">404</p>
+    <h1 class="vbg-page-title">This page didn't make it through the build.</h1>
+    <p class="vbg-404-lede">The link might be old, or this page was unpublished. Either way, the generator could not find a matching content file when it last ran.</p>
+    <pre class="vbg-404-log" aria-label="Build log"><span><span class="vbg-404-prompt">$</span> brisk build</span>
+<span>· walking content tree   →  ok</span>
+<span>· reading frontmatter    →  ok</span>
+<span>· resolving permalink    →  <strong class="vbg-404-fail">not found</strong></span>
+<span class="vbg-404-error">error: no content matches /this-page</span></pre>
+    <div class="vbg-404-cta">
+      <a class="vbg-btn vbg-btn--primary" href="/"><span aria-hidden="true">←</span> Back home</a>
+      <a class="vbg-btn vbg-btn--ghost" href="/archives/">Browse archives</a>
+    </div>
+  </section>
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

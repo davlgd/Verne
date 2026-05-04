@@ -1,0 +1,64 @@
+<nav class="vb-sidebar" id="vb-sidebar" data-mobile-sidebar aria-label="Table of contents">
+  <div class="vb-sidebar-head">
+    <a class="vb-brand" href="/" aria-label="{{ site.title }}, home">
+      <span class="vb-brand-mark">V</span>
+      <span class="vb-brand-text">
+        <span class="vb-brand-title">{{ site.title }}</span>
+        <span class="vb-brand-sub">{{ site.generator | replace("Verne ", "v") }}</span>
+      </span>
+    </a>
+    <button type="button" class="vb-icon-btn vb-icon-btn--subtle vb-sidebar-collapse" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="vb-sidebar" data-toggle="sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+  </div>
+  <div class="vb-sidebar-body">
+    <ol class="vb-toc">
+    {%- for c in site.summary -%}
+      {%- if c.is_header -%}
+      <li class="vb-toc-section" role="none"><span class="vb-toc-section-label" role="heading" aria-level="2">{{ c.title }}</span></li>
+      {%- elif c.children -%}
+      <li class="vb-toc-li">
+        <a class="vb-toc-item{% if c.url == page.relpermalink %} active{% endif %}" href="{{ c.url }}"{% if c.url == page.relpermalink %} aria-current="page"{% endif %}>
+          {%- if c.chapter_no %}<span class="vb-toc-num">{{ c.chapter_no }}</span>{% endif %}<span class="vb-toc-text">{{ c.title }}</span>
+        </a>
+        <ol class="vb-toc-children">
+        {%- for c2 in c.children -%}
+          {%- if c2.children -%}
+          <li class="vb-toc-li">
+            <a class="vb-toc-item{% if c2.url == page.relpermalink %} active{% endif %}" href="{{ c2.url }}"{% if c2.url == page.relpermalink %} aria-current="page"{% endif %}>
+              {%- if c2.chapter_no %}<span class="vb-toc-num">{{ c2.chapter_no }}</span>{% endif %}<span class="vb-toc-text">{{ c2.title }}</span>
+            </a>
+            <ol class="vb-toc-children">
+            {%- for c3 in c2.children -%}
+              <li class="vb-toc-li">
+                <a class="vb-toc-item{% if c3.url == page.relpermalink %} active{% endif %}" href="{{ c3.url }}"{% if c3.url == page.relpermalink %} aria-current="page"{% endif %}>
+                  {%- if c3.chapter_no %}<span class="vb-toc-num">{{ c3.chapter_no }}</span>{% endif %}<span class="vb-toc-text">{{ c3.title }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+            </ol>
+          </li>
+          {%- else -%}
+          <li class="vb-toc-li">
+            <a class="vb-toc-item{% if c2.url == page.relpermalink %} active{% endif %}" href="{{ c2.url }}"{% if c2.url == page.relpermalink %} aria-current="page"{% endif %}>
+              {%- if c2.chapter_no %}<span class="vb-toc-num">{{ c2.chapter_no }}</span>{% endif %}<span class="vb-toc-text">{{ c2.title }}</span>
+            </a>
+          </li>
+          {%- endif -%}
+        {%- endfor -%}
+        </ol>
+      </li>
+      {%- else -%}
+      <li class="vb-toc-li">
+        <a class="vb-toc-item{% if c.url == page.relpermalink %} active{% endif %}{% if not c.chapter_no %} vb-toc-item--home{% endif %}" href="{{ c.url }}"{% if c.url == page.relpermalink %} aria-current="page"{% endif %}>
+          {%- if c.chapter_no %}<span class="vb-toc-num">{{ c.chapter_no }}</span>{% endif %}<span class="vb-toc-text">{{ c.title }}</span>
+        </a>
+      </li>
+      {%- endif -%}
+    {%- endfor -%}
+    </ol>
+  </div>
+  <div class="vb-sidebar-foot">
+    <span>Built with <a href="{% if site.params.repository_url %}{{ site.params.repository_url }}{% else %}https://github.com/davlgd/Verne{% endif %}" rel="noopener noreferrer">{{ site.generator | default("Verne") }}</a></span>
+  </div>
+</nav>

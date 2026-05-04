@@ -1,0 +1,47 @@
+<header class="vd-header" role="banner">
+  <div class="vd-header-inner">
+    <a href="/" class="vd-brand" aria-label="{{ site.title }}, home">
+      <svg class="vd-brand-mark" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9.5"/>
+        <path d="M12 2.5v19M2.5 12h19"/>
+        <path d="M12 12 6 6M12 12l6-6M12 12 6 18M12 12l6 6" stroke-width="1"/>
+        <path d="M12 4l1.6 8L12 20l-1.6-8z" fill="currentColor" stroke="none"/>
+      </svg>
+      <span translate="no">Verne</span>
+      <span class="sep" aria-hidden="true">·</span>
+      <strong translate="no">Docs</strong>
+      {%- with v = site.generator %}
+      <span class="ver" aria-hidden="true">{{ v | replace("Verne ", "v") }}</span>
+      {%- endwith %}
+    </a>
+
+    <div class="vd-search-wrap">
+      {%- with sp = site.params.ui.search_placeholder | default("Search the docs…") -%}
+      <button type="button" class="vd-search kbar-trigger" aria-label="{{ sp }}">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+        <span class="vd-search-text">{{ sp }}</span>
+        <span class="vd-search-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+      </button>
+      {%- endwith %}
+    </div>
+
+    <div class="vd-actions">
+      <button type="button" class="vd-icon-btn vd-mobile-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="vd-sidebar" data-toggle="mobile">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      {%- with gh = site.params.socials.github %}
+      {%- if gh %}
+      <a href="{{ gh }}" class="vd-icon-link" rel="me noopener noreferrer" target="_blank" aria-label="GitHub repository (opens in a new tab)">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg>
+      </a>
+      {%- endif %}
+      {%- endwith %}
+      <button type="button" class="vd-icon-btn" aria-label="Toggle theme" aria-pressed="false" data-toggle="theme">
+        <svg class="vd-icon-sun"  aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="vd-icon-moon" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>

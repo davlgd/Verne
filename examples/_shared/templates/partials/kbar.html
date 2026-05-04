@@ -1,0 +1,54 @@
+{%- with sp = site.params.ui.search_placeholder | default("Search…") -%}
+<div class="kbar-overlay" id="kbarOverlay" hidden>
+  <div class="kbar" role="dialog" aria-modal="true" aria-label="{{ sp }}">
+    <div class="kbar-search">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="kbarInput" type="text" placeholder="{{ sp }}" autocomplete="off" role="combobox" aria-controls="kbarList" aria-expanded="false" aria-autocomplete="list" aria-label="{{ sp }}">
+      <kbd>ESC</kbd>
+    </div>
+    <div class="kbar-list" id="kbarList" role="listbox" aria-label="{{ sp }}">
+      <div class="kbar-empty" id="kbarEmpty" role="status" aria-live="polite" hidden>No matches.</div>
+      <div class="kbar-section-h">Navigation</div>
+      <div class="kbar-item" role="option" aria-selected="false" id="kbar-i-home" data-search="{{ site.title }} home" data-url="/">
+        <span class="kbar-icn">▸</span><span class="kbar-lbl">{{ site.title }}<span class="kbar-sub">/</span></span>
+      </div>
+      {%- for c in site.summary -%}
+        {%- if c.is_header and c.title -%}
+      <div class="kbar-section-h">{{ c.title }}</div>
+        {%- elif c.url -%}
+      <div class="kbar-item" role="option" aria-selected="false" data-search="{{ c.title }} {{ c.chapter_no }} {{ c.url }}" data-url="{{ c.url }}">
+        <span class="kbar-icn">{% if c.chapter_no %}{{ c.chapter_no }}{% else %}≡{% endif %}</span><span class="kbar-lbl">{{ c.title }}<span class="kbar-sub">{{ c.url }}</span></span>
+      </div>
+          {%- if c.children -%}
+            {%- for child in c.children -%}
+      <div class="kbar-item" role="option" aria-selected="false" data-search="{{ child.title }} {{ child.chapter_no }} {{ child.url }}" data-url="{{ child.url }}">
+        <span class="kbar-icn">{% if child.chapter_no %}{{ child.chapter_no }}{% else %}·{% endif %}</span><span class="kbar-lbl">{{ child.title }}<span class="kbar-sub">{{ child.url }}</span></span>
+      </div>
+              {%- if child.children -%}
+                {%- for gc in child.children -%}
+      <div class="kbar-item" role="option" aria-selected="false" data-search="{{ gc.title }} {{ gc.chapter_no }} {{ gc.url }}" data-url="{{ gc.url }}">
+        <span class="kbar-icn">{% if gc.chapter_no %}{{ gc.chapter_no }}{% else %}·{% endif %}</span><span class="kbar-lbl">{{ gc.title }}<span class="kbar-sub">{{ gc.url }}</span></span>
+      </div>
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if site.posts | length > 0 %}
+      <div class="kbar-section-h">Posts</div>
+        {%- for p in site.posts -%}
+      <div class="kbar-item" role="option" aria-selected="false" data-search="{{ p.title }} {{ p.description }} {{ p.relpermalink }}" data-url="{{ p.relpermalink }}">
+        <span class="kbar-icn">▤</span><span class="kbar-lbl">{{ p.title }}<span class="kbar-sub">{{ p.relpermalink }}</span></span>
+      </div>
+        {%- endfor -%}
+      {%- endif %}
+    </div>
+    <div class="kbar-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> open</span>
+      <span><kbd>esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+{%- endwith %}

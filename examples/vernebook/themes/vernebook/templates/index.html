@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="home">
+<a href="#vb-main" class="skip-link">Skip to content</a>
+<div class="vb-progress" data-reading-progress aria-hidden="true"></div>
+<div class="vb-layout">
+{% include "partials/sidebar.html" %}
+  <div class="vb-main">
+{% include "partials/menu-bar.html" %}
+    <main id="vb-main" class="vb-page vb-page--home" tabindex="-1">
+      <article class="vb-titlepage">
+        <p class="vb-titlepage-eyebrow">{{ site.params.eyebrow | default("A Verne example") }}</p>
+        <h1 class="vb-titlepage-title">{{ site.title }}</h1>
+        <p class="vb-titlepage-tagline">{{ site.params.description }}</p>
+        <div class="vb-titlepage-cta">
+          {% if site.summary and site.summary[0].url %}
+          <a class="vb-btn vb-btn--primary" href="{{ site.summary[0].url }}">Begin reading <span aria-hidden="true">→</span></a>
+          {% endif %}
+          <button type="button" class="vb-btn vb-btn--ghost" data-action="print-book">Print the book</button>
+          {% if site.params.repository_url %}
+          <a class="vb-btn vb-btn--ghost" href="{{ site.params.repository_url }}" target="_blank" rel="noopener noreferrer">View source</a>
+          {% endif %}
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+{% include "partials/kbar.html" %}
+</body>
+</html>

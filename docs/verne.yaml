@@ -1,0 +1,53 @@
+title: "Verne"
+baseURL: "https://www.verne-ssg.org/"
+theme: "vernedocs"
+locale: "en"
+
+# Edit-on-VCS link template. `{path}` is substituted per page with its source
+# path under `content/`. Compatible with GitHub, GitLab, Codeberg, Forgejo,
+# sourcehut. Comment out to hide the "Edit this page" link.
+edit_url: "https://github.com/davlgd/Verne/edit/main/docs/content/{path}"
+
+permalinks:
+  guides: "/guides/:slug/"
+  reference: "/reference/:slug/"
+
+# Two-level sidebar. A row with `children:` and no `url:` renders as a
+# collapsible group; a row with both renders as a parent link plus its own
+# group of children. Leaves are simple `{title, url}` pairs. Header rows
+# (`{header: "..."}`) draw a visual divider with no link.
+summary:
+  - header: ""
+  - title: "Introduction"
+    url: "/guides/introduction/"
+  - title: "Installation"
+    url: "/guides/installation/"
+  - title: "Quick start"
+    url: "/guides/quick-start/"
+
+  - header: "Guides"
+  - title: "Writing content"
+    url: "/guides/writing-content/"
+  - title: "Theming"
+    url: "/guides/theming/"
+  - title: "Deploying"
+    url: "/guides/deploying/"
+
+  - header: "Reference"
+  - title: "CLI"
+    url: "/reference/cli/"
+  - title: "Configuration"
+    url: "/reference/configuration/"
+  - title: "Templates"
+    url: "/reference/templates/"
+  - title: "Shortcodes"
+    url: "/reference/shortcodes/"
+
+params:
+  description: "Verne — a small static site generator written in V."
+  tagline: "A small static site generator, written in V."
+  socials:
+    github: "https://github.com/davlgd/Verne"
+  ui:
+    search_placeholder: "Search the docs…"
+    edit_label: "Edit this page"

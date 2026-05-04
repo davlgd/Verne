@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body>
+<a href="#vd-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<div class="vd-shell">
+{% include "partials/sidebar.html" %}
+  <main id="vd-main" class="vd-main" tabindex="-1">
+{% include "partials/breadcrumb.html" %}
+    <h1 class="vd-page-title">{{ page.title }}</h1>
+    {% if page.description %}<p class="vd-page-lede">{{ page.description }}</p>{% endif %}
+    <div class="vd-prose">
+{{ page.content }}
+    </div>
+{% include "partials/pagination.html" %}
+{% include "partials/page-footer.html" %}
+  </main>
+{% include "partials/on-this-page.html" %}
+</div>
+{% include "partials/kbar.html" %}
+</body>
+</html>

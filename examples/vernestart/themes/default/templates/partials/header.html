@@ -1,0 +1,11 @@
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header" role="banner">
+  <div class="container row">
+    <a class="brand" href="/" rel="home">{{ site.title }}</a>
+    <nav aria-label="Primary">
+      <a href="/"{% if page.is_home %} aria-current="page"{% endif %}>Home</a>
+      <a href="/posts/"{% if page.section == "posts" %} aria-current="page"{% endif %}>Posts</a>
+      <a href="/about/"{% if page.relpermalink == "/about/" %} aria-current="page"{% endif %}>About</a>
+    </nav>
+  </div>
+</header>

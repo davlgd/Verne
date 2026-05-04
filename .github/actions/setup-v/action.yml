@@ -1,0 +1,12 @@
+name: Setup V
+description: Clone and build the V compiler from source, then add it to PATH.
+
+runs:
+  using: composite
+  steps:
+    - name: Clone and build V
+      shell: bash
+      run: |
+        git clone --depth 1 https://github.com/vlang/v
+        cd v && make
+        echo "${PWD}" >> ${GITHUB_PATH}

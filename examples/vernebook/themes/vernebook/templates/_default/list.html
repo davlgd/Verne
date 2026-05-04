@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="list">
+<a href="#vb-main" class="skip-link">Skip to content</a>
+<div class="vb-progress" data-reading-progress aria-hidden="true"></div>
+<div class="vb-layout">
+{% include "partials/sidebar.html" %}
+  <div class="vb-main no-rail">
+{% include "partials/menu-bar.html" %}
+    <main id="vb-main" class="vb-page" tabindex="-1">
+      <article class="vb-chapter">
+        <h1 class="vb-ch-title">{{ page.title }}</h1>
+        <div class="vb-prose">
+{{ page.content }}
+          {% if page.pages %}
+          <ul>
+          {%- for p in page.pages %}
+            <li><a href="{{ p.permalink }}">{{ p.title }}</a>{% if p.description %} — <em>{{ p.description }}</em>{% endif %}</li>
+          {%- endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+{% include "partials/kbar.html" %}
+</body>
+</html>

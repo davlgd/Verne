@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="page">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-shell" tabindex="-1">
+  <section class="vbg-page">
+    <p class="vbg-eyebrow">{{ page.title }}</p>
+    <h1 class="vbg-page-title">{{ page.params.headline | default(page.params.description) | default(page.title) }}</h1>
+
+    <div class="vbg-prose">
+{{ page.content }}
+    </div>
+
+    {%- if page.relpermalink == "/about/" %}
+    <div class="vbg-author-grid">
+      {%- for author in site.params.authors %}
+      <article class="vbg-author-card">
+        <span class="vbg-avatar vbg-avatar--lg" aria-hidden="true">{{ author.initial }}</span>
+        <div>
+          <p class="vbg-author-name">{{ author.name }}</p>
+          <p class="vbg-author-role">{{ author.role }}</p>
+          <p class="vbg-author-bio">{{ author.bio }}</p>
+        </div>
+      </article>
+      {%- endfor %}
+    </div>
+
+    <div class="vbg-stats">
+      <div class="vbg-stat">
+        <p class="vbg-stat-value">{{ site.params.ssg_version | default("v0.18.2") }}</p>
+        <p class="vbg-stat-label">Current release</p>
+      </div>
+      <div class="vbg-stat">
+        <p class="vbg-stat-value">{{ site.params.ssg_build_time | default("0.34s") }}</p>
+        <p class="vbg-stat-label">Median rebuild</p>
+      </div>
+      <div class="vbg-stat">
+        <p class="vbg-stat-value">MIT</p>
+        <p class="vbg-stat-label">License</p>
+      </div>
+    </div>
+
+    <div class="vbg-subscribe">
+      <p class="vbg-eyebrow">Subscribe</p>
+      <h3 class="vbg-subscribe-title">One email when there's something new.</h3>
+      <form class="vbg-subscribe-form" method="post" action="#" onsubmit="return false">
+        <label class="vbg-sr-only" for="vbg-email">Email address</label>
+        <input id="vbg-email" type="email" autocomplete="email" placeholder="you@somewhere.dev" required>
+        <button type="submit">Subscribe</button>
+      </form>
+      <p class="vbg-subscribe-foot">or grab the <a href="/index.xml">RSS feed</a></p>
+    </div>
+    {%- endif %}
+  </section>
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

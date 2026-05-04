@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body>
+<a href="#vd-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vd-main" class="vd-home" tabindex="-1">
+  <section class="vd-hero" aria-labelledby="vd-hero-title">
+    <div class="vd-hero-kicker">
+      <span class="dot" aria-hidden="true"></span>
+      <span>{{ page.params.hero.kicker | default("Documentation") }}</span>
+      {% if page.params.hero.kicker_meta %}<span class="sep" aria-hidden="true">·</span><span>{{ page.params.hero.kicker_meta }}</span>{% endif %}
+    </div>
+    <h1 id="vd-hero-title" class="vd-hero-title">{{ page.params.hero.title | safe }}</h1>
+    <p class="vd-hero-tagline">{{ page.params.hero.tagline }}</p>
+    {% if page.params.hero.summary %}<p class="vd-hero-summary">{{ page.params.hero.summary }}</p>{% endif %}
+    {% if page.params.hero.cta %}
+    <div class="vd-cta-row">
+      {% for c in page.params.hero.cta %}
+      <a class="vd-btn{% if c.primary %} vd-btn--primary{% endif %}" href="{{ c.href }}">
+        <span>{{ c.label }}</span>
+        <span class="arrow" aria-hidden="true">→</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+
+  {% if page.params.keypoints %}
+  <section class="vd-keypoints" aria-label="Key points">
+    {% for kp in page.params.keypoints %}
+    <article class="vd-kp">
+      <p class="vd-kp-kicker">{{ kp.kicker }}</p>
+      <h2 class="vd-kp-title">{{ kp.title }}</h2>
+      <p class="vd-kp-body">{{ kp.body }}</p>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if page.params.sections %}
+  {% for s in page.params.sections %}
+  <section class="vd-section" aria-label="{{ s.title }}">
+    <header class="vd-section-head">
+      <span class="vd-section-num" aria-hidden="true">{{ loop.index | printf("%02d") }} ━━</span>
+      <h2 class="vd-section-title">{{ s.title }}</h2>
+    </header>
+    <div class="vd-section-list">
+      {% for it in s.items %}
+      <a class="vd-section-item" href="{{ it.href }}">
+        <span class="ttl">{{ it.title }}</span>
+        <span class="lede">{{ it.lede }}</span>
+        <span class="arr" aria-hidden="true">→</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  {% endif %}
+
+  <footer class="vd-home-foot">
+    <span>Built with <a href="{{ site.params.socials.github }}">{{ site.generator }}</a></span>
+    {% if page.params.footnote %}<span>{{ page.params.footnote }}</span>{% endif %}
+  </footer>
+</main>
+{% include "partials/kbar.html" %}
+</body>
+</html>

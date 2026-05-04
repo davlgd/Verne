@@ -1,0 +1,58 @@
+title: "The Verne Book"
+baseURL: "http://localhost:8000/"
+theme: "vernebook"
+locale: "en"
+
+# When set, every page's `page.edit_url` is built from this template by
+# substituting `{path}` with the page's source path under `content/`.
+# Compatible with GitHub, GitLab (`/-/edit/...`), Codeberg, Forgejo, sourcehut.
+edit_url: "https://github.com/davlgd/Verne/edit/main/examples/vernebook/content/{path}"
+
+permalinks:
+  chapter: "/chapter/:slug/"
+
+# The book's table of contents — drives both the sidebar and the in-section
+# prev/next chain. Authored once here, rendered everywhere.
+#
+# Each row is one of:
+#   - a leaf link        ({title, url})
+#   - a parent link      ({title, url, children: [...]}) up to any depth
+#   - a part header      ({header: "Part I"}) — visual divider, no link
+summary:
+  - title: "Welcome"
+    url: "/chapter/01-welcome/"
+
+  - header: "Part I — Getting Started"
+  - title: "Introduction"
+    url: "/chapter/02-introduction/"
+  - title: "Installation"
+    url: "/chapter/03-installation/"
+    children:
+      - title: "macOS"
+        url: "/chapter/03a-installation-macos/"
+      - title: "Linux"
+        url: "/chapter/03b-installation-linux/"
+
+  - header: "Part II — Authoring"
+  - title: "Writing Markdown"
+    url: "/chapter/04-writing-markdown/"
+  - title: "Templates"
+    url: "/chapter/05-templates/"
+    children:
+      - title: "Filters"
+        url: "/chapter/05a-filters/"
+        children:
+          - title: "String filters"
+            url: "/chapter/05a1-string-filters/"
+          - title: "Date filters"
+            url: "/chapter/05a2-date-filters/"
+      - title: "Shortcodes"
+        url: "/chapter/05b-shortcodes/"
+
+  - header: "Part III — Wrapping Up"
+  - title: "Conclusion"
+    url: "/chapter/06-conclusion/"
+
+params:
+  description: "A book-shaped example showcasing Verne's template engine."
+  repository_url: "https://github.com/davlgd/Verne"

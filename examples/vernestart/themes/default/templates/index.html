@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body>
+{% include "partials/header.html" %}
+<main id="main" class="container">
+  <section class="lede">
+    <h1>{{ site.title }}</h1>
+    {%- if site.params.tagline %}
+    <p>{{ site.params.tagline }}</p>
+    {%- endif %}
+  </section>
+  <section class="entries" aria-labelledby="entries-title">
+    <h2 id="entries-title" class="eyebrow">Recent writing</h2>
+    <ol class="entry-list" reversed>
+      {%- for p in site.recent_posts %}
+      <li class="entry">
+        <a class="entry-link" href="{{ p.relpermalink }}">
+          <time class="entry-date" datetime="{{ p.date | format_date("2006-01-02") }}">{{ p.date | format_date("Jan 2, 2006") }}</time>
+          <span class="entry-title">{{ p.title }}</span>
+        </a>
+        {%- if p.description %}
+        <p class="entry-summary">{{ p.description }}</p>
+        {%- endif %}
+      </li>
+      {%- endfor %}
+    </ol>
+    {%- if site.has_more_posts %}
+    <p class="see-all"><a href="/posts/">All posts →</a></p>
+    {%- endif %}
+  </section>
+</main>
+{% include "partials/footer.html" %}
+</body>
+</html>

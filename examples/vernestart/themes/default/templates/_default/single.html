@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body>
+{% include "partials/header.html" %}
+<main id="main" class="container">
+  <article class="prose">
+    <header class="prose-head">
+      <h1>{{ page.title }}</h1>
+      {%- if page.section == "posts" %}
+      <p class="prose-meta">
+        <time datetime="{{ page.date | format_date("2006-01-02") }}">{{ page.date | format_date("January 2, 2006") }}</time>
+        <span class="sep" aria-hidden="true">/</span>
+        <span>{{ page.reading_time }} min</span>
+        {%- if page.tags %}
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="prose-tags">
+          {%- for t in page.tags -%}
+          {%- if not loop.first %}, {% endif -%}
+          <span>{{ t }}</span>
+          {%- endfor -%}
+        </span>
+        {%- endif %}
+      </p>
+      {%- endif %}
+    </header>
+    <div class="prose-body">
+      {{ page.content }}
+    </div>
+  </article>
+  {%- if page.section == "posts" and ((page.prev_in_section is defined and page.prev_in_section is not none) or (page.next_in_section is defined and page.next_in_section is not none)) %}
+  <nav class="prose-nav" aria-label="Adjacent posts">
+    {%- if page.prev_in_section is defined and page.prev_in_section is not none %}
+    <a class="prose-nav-prev" rel="prev" href="{{ page.prev_in_section.relpermalink }}">
+      <span class="prose-nav-eyebrow">Earlier</span>
+      <span class="prose-nav-title">{{ page.prev_in_section.title }}</span>
+    </a>
+    {%- endif %}
+    {%- if page.next_in_section is defined and page.next_in_section is not none %}
+    <a class="prose-nav-next" rel="next" href="{{ page.next_in_section.relpermalink }}">
+      <span class="prose-nav-eyebrow">Later</span>
+      <span class="prose-nav-title">{{ page.next_in_section.title }}</span>
+    </a>
+    {%- endif %}
+  </nav>
+  {%- endif %}
+</main>
+{% include "partials/footer.html" %}
+</body>
+</html>

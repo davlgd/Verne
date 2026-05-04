@@ -1,0 +1,33 @@
+<header class="vb-bar" role="banner">
+  <button type="button" class="vb-icon-btn vb-sidebar-expand" aria-label="Show sidebar" aria-expanded="false" aria-controls="vb-sidebar" data-toggle="sidebar-expand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+  </button>
+  <button type="button" class="vb-icon-btn vb-mobile-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="vb-sidebar" data-toggle="mobile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  {% if not page.is_home %}
+  <nav class="vb-crumb" aria-label="Breadcrumb">
+    <a href="/">{{ site.title }}</a><span class="vb-crumb-sep" aria-hidden="true">›</span>{% if page.chapter_no %}<span class="vb-crumb-num">{{ page.chapter_no }}</span> {% endif %}<strong aria-current="page">{{ page.title }}</strong>
+  </nav>
+  {% else %}
+  <p class="vb-crumb"><strong>{{ site.title }}</strong></p>
+  {% endif %}
+  <button type="button" class="vb-search-btn kbar-trigger" data-toggle="search" aria-label="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <span>Search</span>
+    <span class="vb-search-kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+  </button>
+  <span class="vb-bar-divider" aria-hidden="true"></span>
+  <button type="button" class="vb-icon-btn" aria-label="Print whole book" title="Print whole book" data-action="print-book">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+  </button>
+  {% if site.params.repository_url %}
+  <a class="vb-icon-btn" href="{{ site.params.repository_url }}" target="_blank" rel="noopener noreferrer" aria-label="View on GitHub (opens in a new tab)" title="View on GitHub">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.27-.01-1.18-.02-2.13-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.24.73-1.53-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.17a11.1 11.1 0 0 1 5.79 0c2.21-1.48 3.18-1.17 3.18-1.17.62 1.58.23 2.75.11 3.04.74.8 1.18 1.82 1.18 3.08 0 4.42-2.69 5.39-5.25 5.68.41.35.78 1.05.78 2.12 0 1.53-.01 2.77-.01 3.14 0 .31.21.67.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+  </a>
+  {% endif %}
+  <button type="button" class="vb-icon-btn" aria-label="Toggle theme" aria-pressed="false" data-toggle="theme">
+    <svg class="vb-icon-sun"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    <svg class="vb-icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+  </button>
+</header>

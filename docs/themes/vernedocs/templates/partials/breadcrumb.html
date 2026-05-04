@@ -1,0 +1,7 @@
+{% if not page.is_home %}
+<nav class="vd-breadcrumb" aria-label="Breadcrumb">
+  <a href="/">{{ site.title }}</a>
+  {% if page.section and not page.is_section %}<span class="sep" aria-hidden="true">/</span><a href="/{{ page.section }}/">{{ page.section | replace("-", " ") | replace("_", " ") }}</a>{% endif %}
+  <span class="sep" aria-hidden="true">/</span><span class="vd-breadcrumb-current" aria-current="page">{{ page.title }}</span>
+</nav>
+{% endif %}

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="list">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-shell" tabindex="-1">
+  <section class="vbg-page">
+    <p class="vbg-eyebrow">Section</p>
+    <h1 class="vbg-page-title">{{ page.title }}</h1>
+    <div class="vbg-prose">
+{{ page.content }}
+    </div>
+    {% if page.pages %}
+    <ul class="vbg-section-list">
+      {%- for p in page.pages %}
+      <li><a href="{{ p.relpermalink }}">{{ p.title }}</a>{% if p.params.description %} — <span>{{ p.params.description }}</span>{% endif %}</li>
+      {%- endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

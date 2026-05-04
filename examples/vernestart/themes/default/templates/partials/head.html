@@ -1,0 +1,19 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)">
+<title>{% if not page.is_home %}{{ page.title }} · {% endif %}{{ site.title }}</title>
+<meta name="description" content="{{ page.meta_description }}">
+<meta name="generator" content="{{ site.generator }}">
+<link rel="canonical" href="{{ page.permalink }}">
+<link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="/index.xml">
+<meta property="og:type" content="{{ page.og_type }}">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.meta_description }}">
+<meta property="og:url" content="{{ page.permalink }}">
+<meta property="og:site_name" content="{{ site.title }}">
+<meta property="og:locale" content="{{ site.language_code }}">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="{{ assets.css_url }}" integrity="{{ assets.css_integrity }}" crossorigin="anonymous">
+<script defer src="{{ assets.js_url }}" integrity="{{ assets.js_integrity }}" crossorigin="anonymous"></script>

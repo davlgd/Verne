@@ -1,0 +1,13 @@
+<footer class="vbg-footer">
+  <div class="vbg-footer-brand">
+    <div class="vbg-footer-title">{{ site.title }}</div>
+    <div class="vbg-footer-tag">{{ site.params.tagline | default("Notes from the build pipeline") }}</div>
+  </div>
+  <div class="vbg-footer-meta">
+    <span>{{ site.params.ssg_version | default("v0.18.2") }}</span>
+    <span aria-hidden="true">·</span>
+    <span>Built in {{ site.params.ssg_build_time | default("0.34s") }}</span>
+    <span aria-hidden="true">·</span>
+    <span>{{ site.posts | length }} posts</span>
+  </div>
+</footer>

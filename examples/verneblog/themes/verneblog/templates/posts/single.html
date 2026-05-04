@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="post">
+<a href="#vbg-main" class="skip-link">Skip to content</a>
+<div class="vbg-progress" data-reading-progress aria-hidden="true"></div>
+{% include "partials/header.html" %}
+<main id="vbg-main" class="vbg-article-shell" tabindex="-1">
+  <article class="vbg-article">
+    <div class="vbg-article-body">
+      <a class="vbg-back" href="/"><span aria-hidden="true">←</span> back</a>
+      {%- if page.params.tags %}
+      <div class="vbg-tags">
+        {%- for t in page.params.tags %}<span class="vbg-tag vbg-tag--sm">{{ t }}</span>{% endfor -%}
+      </div>
+      {%- endif %}
+      <h1 class="vbg-article-title">{{ page.title }}</h1>
+      {% if page.params.description %}<p class="vbg-article-subtitle">{{ page.params.description }}</p>{% endif %}
+      <p class="vbg-article-meta">
+        {%- for author in site.params.authors -%}
+          {%- if author.id == page.params.author %}
+          <span class="vbg-avatar" aria-hidden="true">{{ author.initial }}</span>
+          <span class="vbg-article-author">{{ author.name }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+        <span aria-hidden="true">·</span>
+        <span>{{ page.date | format_date("Jan 2, 2006") }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ page.params.read_time | default(page.reading_time) }} min read</span>
+      </p>
+
+      <div class="vbg-cover vbg-article-cover" data-cover-hue="{{ page.params.cover_hue | default(28) }}" aria-hidden="true">
+        <span class="vbg-cover-stripes"></span>
+        <span class="vbg-cover-label">{{ page.params.cover_label | default("cover") }}</span>
+      </div>
+
+      <div class="vbg-prose">
+{{ page.content }}
+      </div>
+
+      <div class="vbg-article-foot">
+        <div class="vbg-tags">
+          {%- for t in page.params.tags %}<span class="vbg-tag vbg-tag--sm">{{ t }}</span>{% endfor -%}
+        </div>
+        {% if page.edit_url %}
+        <a class="vbg-share" href="{{ page.edit_url }}" target="_blank" rel="noopener noreferrer">{{ site.params.ui.edit_label | default("Edit on GitHub") }}</a>
+        {% endif %}
+      </div>
+
+      {%- with prev = page.prev_in_section %}
+      {%- with next = page.next_in_section %}
+      {% if prev or next %}
+      <nav class="vbg-folio" aria-label="Post navigation">
+        {% if prev %}
+        <a class="vbg-folio-card" href="{{ prev.relpermalink }}" rel="prev">
+          <span class="vbg-folio-eyebrow"><span aria-hidden="true">←</span> Newer</span>
+          <span class="vbg-folio-title">{{ prev.title }}</span>
+        </a>
+        {% else %}<span aria-hidden="true"></span>{% endif %}
+        {% if next %}
+        <a class="vbg-folio-card" href="{{ next.relpermalink }}" rel="next">
+          <span class="vbg-folio-eyebrow">Older <span aria-hidden="true">→</span></span>
+          <span class="vbg-folio-title">{{ next.title }}</span>
+        </a>
+        {% else %}<span aria-hidden="true"></span>{% endif %}
+      </nav>
+      {% endif %}
+      {%- endwith %}
+      {%- endwith %}
+    </div>
+
+    <aside class="vbg-toc" data-toc-rail aria-labelledby="vbg-toc-label">
+      <p class="vbg-toc-label" id="vbg-toc-label">On this page</p>
+      <div class="vbg-toc-nav">{{ page.toc }}</div>
+      <p class="vbg-toc-footer">{{ page.params.read_time | default(page.reading_time) }} min total</p>
+    </aside>
+  </article>
+</main>
+{% include "partials/footer.html" %}
+{% include "partials/kbar.html" %}
+</body>
+</html>

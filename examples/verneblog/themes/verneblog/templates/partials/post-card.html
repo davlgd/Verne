@@ -1,0 +1,23 @@
+{# Render one post-card. Caller binds `p` (typically a `for p in …` loop). #}
+<article class="vbg-card">
+  <a class="vbg-card-link" href="{{ p.relpermalink }}">
+    <div class="vbg-cover" data-cover-hue="{{ p.params.cover_hue | default(28) }}" aria-hidden="true">
+      <span class="vbg-cover-stripes"></span>
+      <span class="vbg-cover-label">{{ p.params.cover_label | default(p.section) }}</span>
+    </div>
+    <div class="vbg-card-body">
+      {%- if p.params.tags -%}
+      <div class="vbg-tags">
+        {%- for t in p.params.tags %}<span class="vbg-tag vbg-tag--sm">{{ t }}</span>{% endfor -%}
+      </div>
+      {%- endif %}
+      <h3 class="vbg-card-title">{{ p.title }}</h3>
+      <p class="vbg-card-excerpt">{{ p.params.description | default(p.description) }}</p>
+      <p class="vbg-card-meta">
+        <span>{{ p.date | format_date("Jan 2, 2006") }}</span>
+        <span aria-hidden="true">·</span>
+        <span>{{ p.params.read_time | default(p.reading_time) }} min</span>
+      </p>
+    </div>
+  </a>
+</article>

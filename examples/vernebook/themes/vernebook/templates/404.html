@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="{{ site.language }}">
+<head>
+{% include "partials/head.html" %}
+</head>
+<body data-page="error">
+<a href="#vb-main" class="skip-link">Skip to content</a>
+<div class="vb-layout">
+{% include "partials/sidebar.html" %}
+  <div class="vb-main no-rail">
+{% include "partials/menu-bar.html" %}
+    <main id="vb-main" class="vb-page vb-page--error" tabindex="-1">
+      <article class="vb-chapter vb-404">
+        <p class="vb-ch-eyebrow">Error 404</p>
+        <h1 class="vb-ch-title">Page not found</h1>
+        <p class="vb-ch-subtitle">The chapter you&rsquo;re looking for doesn&rsquo;t exist in <strong>{{ site.title }}</strong>.</p>
+        <div class="vb-titlepage-cta">
+          {% if site.summary and site.summary[0].url %}
+          <a class="vb-btn vb-btn--primary" href="{{ site.summary[0].url }}">Back to chapter 1 <span aria-hidden="true">→</span></a>
+          {% endif %}
+          <a class="vb-btn vb-btn--ghost" href="/">Cover page</a>
+          <button type="button" class="vb-btn vb-btn--ghost kbar-trigger">Search the book</button>
+        </div>
+      </article>
+    </main>
+  </div>
+</div>
+{% include "partials/kbar.html" %}
+</body>
+</html>

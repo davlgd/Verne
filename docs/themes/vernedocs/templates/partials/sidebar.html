@@ -1,0 +1,28 @@
+<nav class="vd-sidebar" id="vd-sidebar" data-mobile-sidebar aria-label="Site navigation">
+  <button type="button" class="vd-icon-btn vd-sidebar-mobile-close" aria-label="Close navigation" data-toggle="mobile">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  {%- for c in site.summary -%}
+    {%- if c.is_header -%}
+{%- if not loop.first %}    </ul>
+  </div>
+{% endif -%}
+  <div class="vd-sidebar-group{% if not c.title %} vd-sidebar-group--top{% endif %}">
+    {% if c.title %}<button type="button" class="vd-sidebar-title" aria-expanded="true" aria-controls="vd-grp-{{ loop.index }}">{{ c.title }}</button>{% endif %}
+    <ul class="vd-sidebar-list" id="vd-grp-{{ loop.index }}" role="list">
+    {%- elif c.children -%}
+      <li>
+        <a href="{{ c.url }}"{% if c.url == page.relpermalink %} aria-current="page"{% endif %}>{{ c.title }}</a>
+        <ul role="list">
+        {%- for child in c.children -%}
+          <li><a href="{{ child.url }}"{% if child.url == page.relpermalink %} aria-current="page"{% endif %}>{{ child.title }}</a></li>
+        {%- endfor -%}
+        </ul>
+      </li>
+    {%- else -%}
+      <li><a href="{{ c.url }}"{% if c.url == page.relpermalink %} aria-current="page"{% endif %}>{{ c.title }}</a></li>
+    {%- endif -%}
+  {%- endfor %}
+    </ul>
+  </div>
+</nav>

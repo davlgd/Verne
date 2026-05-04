@@ -1,0 +1,25 @@
+{% with prev = page.prev_in_section %}
+{% with next = page.next_in_section %}
+{% if prev or next %}
+<nav class="vb-folio" aria-label="Chapter navigation">
+  {% if prev %}
+  <a class="vb-folio-card" href="{{ prev.relpermalink }}" rel="prev" data-vb-prev>
+    <span class="vb-folio-eyebrow"><span aria-hidden="true">←</span> Previous</span>
+    <span class="vb-folio-title">{{ prev.title }}</span>
+  </a>
+  {% else %}
+  <a class="vb-folio-card" href="/" rel="prev" data-vb-prev>
+    <span class="vb-folio-eyebrow"><span aria-hidden="true">←</span> Cover</span>
+    <span class="vb-folio-title">{{ site.title }}</span>
+  </a>
+  {% endif %}
+  {% if next %}
+  <a class="vb-folio-card" href="{{ next.relpermalink }}" rel="next" data-vb-next>
+    <span class="vb-folio-eyebrow">Next <span aria-hidden="true">→</span></span>
+    <span class="vb-folio-title">{{ next.title }}</span>
+  </a>
+  {% else %}<span aria-hidden="true"></span>{% endif %}
+</nav>
+{% endif %}
+{% endwith %}
+{% endwith %}

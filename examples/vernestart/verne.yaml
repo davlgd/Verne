@@ -1,0 +1,14 @@
+title: Vernestart
+baseURL: "http://localhost:1316/"
+locale: en
+theme: default
+
+permalinks:
+  posts: "/posts/:slug/"
+
+params:
+  tagline: "A starter Verne site — default theme demo"
+
+  # How many posts to show on the home page. Anything past this number
+  # is reachable from the "All writing →" link. Default: 5.
+  recent_posts_limit: 5

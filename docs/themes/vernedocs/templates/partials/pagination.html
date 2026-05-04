@@ -1,0 +1,20 @@
+{% with prev = page.prev_in_section %}
+{% with next = page.next_in_section %}
+{% if prev or next %}
+<nav class="vd-page-foot" aria-label="Pagination">
+  {% if prev %}
+  <a class="vd-pn vd-pn--prev" href="{{ prev.relpermalink }}" rel="prev">
+    <span class="lbl"><span aria-hidden="true">←</span> Previous</span>
+    <span class="ttl">{{ prev.title }}</span>
+  </a>
+  {% else %}<span class="vd-pn vd-pn--placeholder" aria-hidden="true"></span>{% endif %}
+  {% if next %}
+  <a class="vd-pn vd-pn--next" href="{{ next.relpermalink }}" rel="next">
+    <span class="lbl">Next <span aria-hidden="true">→</span></span>
+    <span class="ttl">{{ next.title }}</span>
+  </a>
+  {% else %}<span class="vd-pn vd-pn--placeholder" aria-hidden="true"></span>{% endif %}
+</nav>
+{% endif %}
+{% endwith %}
+{% endwith %}

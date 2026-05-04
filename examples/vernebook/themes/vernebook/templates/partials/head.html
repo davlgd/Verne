@@ -1,0 +1,32 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<title>{% if page.display_title %}{{ page.display_title }} · {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+<meta name="description" content="{% if page.meta_description %}{{ page.meta_description }}{% else %}{{ site.params.description }}{% endif %}">
+<meta name="generator" content="{{ site.generator }}">
+<link rel="canonical" href="{{ page.permalink }}">
+<link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('verne:theme'); } catch (e) {}
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    try {
+      var s = localStorage.getItem('verne:sidebar');
+      if (s === 'collapsed') document.documentElement.dataset.sidebar = 'collapsed';
+    } catch (e) {}
+  })();
+</script>
+<style>
+  html[data-theme="dark"]  .vb-icon-sun  { display: none; }
+  html[data-theme="dark"]  .vb-icon-moon { display: block; }
+  html:not([data-theme="dark"]) .vb-icon-moon { display: none; }
+  html:not([data-theme="dark"]) .vb-icon-sun  { display: block; }
+</style>
+
+<link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="stylesheet" href="{{ assets.css_url }}" integrity="{{ assets.css_integrity }}" crossorigin="anonymous">
+<script type="module" src="{{ assets.js_url }}" integrity="{{ assets.js_integrity }}" crossorigin="anonymous"></script>

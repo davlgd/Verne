@@ -1,0 +1,44 @@
+title: "Brisk"
+baseURL: "http://localhost:8000/"
+theme: "verneblog"
+locale: "en"
+
+# Edit-on-VCS link template. Comment out to hide the "Edit this post" link.
+edit_url: "https://github.com/davlgd/Verne/edit/main/examples/verneblog/content/{path}"
+
+permalinks:
+  posts: "/posts/:slug/"
+
+# The blog's primary nav. Each entry is `{title, url}`. Header rows
+# (`{header: "..."}`) are not used here — the nav is flat.
+summary:
+  - title: "Home"
+    url: "/"
+  - title: "Latest"
+    url: "/posts/shipping-static-sites-in-2026/"
+  - title: "Archives"
+    url: "/archives/"
+  - title: "About"
+    url: "/about/"
+
+params:
+  description: "A static site generator that compiles in microseconds."
+  tagline: "Notes from the build pipeline"
+  ssg_version: "v0.18.2"
+  ssg_build_time: "0.34s"
+  authors:
+    - id: "lea"
+      name: "Léa Marchand"
+      role: "Editor"
+      bio: "Writes about the build pipeline. Maintains the parser."
+      initial: "L"
+    - id: "theo"
+      name: "Théo Aubert"
+      role: "Engineer"
+      bio: "Maintains the watcher. Argues about CSS."
+      initial: "T"
+  socials:
+    github: "https://github.com/davlgd/Verne"
+  ui:
+    search_placeholder: "Search posts…"
+    edit_label: "Edit on GitHub"

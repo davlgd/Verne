@@ -1,0 +1,87 @@
+# External tools (installed by `mise install`)
+# ------------------------------------------------------------------
+
+[tools]
+"github:alecthomas/chroma" = "latest"
+
+# Build & quality
+# ------------------------------------------------------------------
+
+[tasks.build]
+description = "Build the verne binary (debug)"
+run = "v -o verne src/"
+
+[tasks.prod]
+description = "Build the verne binary (production)"
+run = "v -prod -o verne src/"
+
+[tasks.fmt]
+description = "Format all V source files in place"
+run = "v fmt -w ."
+
+[tasks.vet]
+description = "Run v vet (style/lint) on the source tree"
+run = "v vet src/"
+
+[tasks.test]
+description = "Run all module tests"
+run = "v test src/"
+
+[tasks.prepare]
+description = "Format, test, and vet — full pre-commit / CI gate"
+depends = ["fmt", "test", "vet"]
+
+# Documentation site
+# ------------------------------------------------------------------
+
+[tasks.build-doc]
+description = "Build the Verne documentation site to docs/public/ (www.verne-ssg.org)"
+depends = ["prod"]
+run = "./verne build docs"
+
+[tasks.serve-doc]
+description = "Serve the documentation site at http://localhost:1313/"
+depends = ["build"]
+run = "./verne server docs -p 1313"
+
+# Example sites
+# ------------------------------------------------------------------
+
+[tasks.serve-verneblog]
+description = "Serve the verneblog example at http://localhost:1314/"
+depends = ["build"]
+run = "./verne server examples/verneblog -p 1314"
+
+[tasks.serve-vernebook]
+description = "Serve the vernebook example at http://localhost:1315/"
+depends = ["build"]
+run = "./verne server examples/vernebook -p 1315"
+
+[tasks.serve-vernestart]
+description = "Serve the vernestart example at http://localhost:1316/"
+depends = ["build"]
+run = "./verne server examples/vernestart -p 1316"
+
+[tasks.serve-all]
+description = "Serve docs + 3 examples in parallel on ports 1313–1316"
+depends = ["build"]
+run = """
+trap 'jobs -p | xargs -r kill 2>/dev/null; exit' INT TERM EXIT
+./verne server docs -p 1313 &
+./verne server examples/verneblog -p 1314 &
+./verne server examples/vernebook -p 1315 &
+./verne server examples/vernestart -p 1316 &
+wait
+"""
+
+# Maintenance
+# ------------------------------------------------------------------
+
+[tasks.clean]
+description = "Remove build artifacts and any public/ output (top-level, docs/, examples/*)"
+run = """
+rm -f verne verne.exe
+rm -rf public docs/public
+for d in examples/*/public; do [ -d "$d" ] && rm -rf "$d"; done
+true
+"""
