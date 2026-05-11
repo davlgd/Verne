@@ -33,10 +33,14 @@ Recognised top-level keys:
   per-tag RSS feeds when `taxonomies:` includes a `tags` plural in
   `verne.yaml` (off by default).
 - **`lastmod`** — *date.* Optional last-modified timestamp.
-- **`llms`** — *bool, default `true`.* Set to `false` to skip this page
-  from the [llmstxt.org](https://llmstxt.org/) outputs (`llms.txt`,
-  `llms-full.txt`, and the page's `<page>.html.md` markdown twin). Useful
-  for pages whose content is mostly UI chrome rather than information.
+- **`llms`** — *bool or `"optional"`, default `true`.* Controls how the
+  page appears in the [llmstxt.org](https://llmstxt.org/) outputs.
+  - `false` skips the page entirely (no `.html.md` twin, absent from
+    both `llms.txt` and `llms-full.txt`).
+  - `"optional"` files the page under the spec-reserved `## Optional`
+    H2 in `llms.txt` (URLs an LLM may skip for a shorter context) and
+    moves it to the tail of `llms-full.txt`.
+  - `true` (or omitted) leaves the page in its natural section.
 
 Anything else lands in `page.params.*` and is available to templates
 unchanged. Use this for theme-specific extras (hero blocks, custom

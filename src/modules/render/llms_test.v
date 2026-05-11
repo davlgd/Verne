@@ -161,13 +161,13 @@ fn test_llms_section_title_empty_key_is_home() {
 	assert llms_section_title('', []&content.Page{}) == 'Home'
 }
 
-fn test_bullet_for_includes_description_when_set() {
+fn test_bullet_for_links_to_html_md_twin() {
 	p := &content.Page{
 		title:       'Quick start'
 		description: 'Your first site.'
 		permalink:   'https://example.com/quick-start/'
 	}
-	assert bullet_for(p) == '- [Quick start](https://example.com/quick-start/): Your first site.'
+	assert bullet_for(p) == '- [Quick start](https://example.com/quick-start/index.html.md): Your first site.'
 }
 
 fn test_bullet_for_falls_back_to_relpermalink() {
@@ -175,7 +175,133 @@ fn test_bullet_for_falls_back_to_relpermalink() {
 		title:         'Quick start'
 		rel_permalink: '/quick-start/'
 	}
-	assert bullet_for(p) == '- [Quick start](/quick-start/)'
+	assert bullet_for(p) == '- [Quick start](/quick-start/index.html.md)'
+}
+
+fn test_md_url_for_handles_missing_trailing_slash() {
+	p := &content.Page{
+		permalink: 'https://example.com/page'
+	}
+	assert md_url_for(p) == 'https://example.com/page/index.html.md'
+}
+
+fn test_canonical_page_order_places_home_then_alpha_sections() {
+	home := &content.Page{
+		title:   'Home'
+		is_home: true
+	}
+	guides_a := &content.Page{
+		title:   'A guide'
+		section: 'guides'
+	}
+	guides_b := &content.Page{
+		title:   'B guide'
+		section: 'guides'
+	}
+	ref := &content.Page{
+		title:   'Ref'
+		section: 'reference'
+	}
+	ordered := canonical_page_order([guides_b, ref, home, guides_a], true)
+	assert ordered.len == 4
+	assert ordered[0].is_home
+	assert ordered[1].title == 'A guide'
+	assert ordered[2].title == 'B guide'
+	assert ordered[3].title == 'Ref'
+}
+
+fn test_canonical_page_order_can_skip_home() {
+	home := &content.Page{
+		is_home: true
+	}
+	other := &content.Page{
+		title:   'X'
+		section: 'guides'
+	}
+	ordered := canonical_page_order([home, other], false)
+	assert ordered.len == 1
+	assert ordered[0].title == 'X'
+}
+
+fn test_canonical_page_order_puts_optional_last() {
+	home := &content.Page{
+		is_home: true
+	}
+	guide := &content.Page{
+		title:   'Guide'
+		section: 'guides'
+	}
+	opt := &content.Page{
+		title:         'Changelog'
+		section:       'meta'
+		llms_optional: true
+	}
+	ordered := canonical_page_order([opt, guide, home], true)
+	assert ordered.len == 3
+	assert ordered[0].is_home
+	assert ordered[1].title == 'Guide'
+	assert ordered[2].title == 'Changelog'
+}
+
+fn test_build_llms_txt_minimal_emits_h1_only() {
+	got := build_llms_txt('Verne', '', []&content.Page{})
+	assert got == '# Verne\n'
+}
+
+fn test_build_llms_txt_emits_blockquote_when_description_set() {
+	got := build_llms_txt('Verne', 'A small SSG.', []&content.Page{})
+	assert got == '# Verne\n\n> A small SSG.\n'
+}
+
+fn test_build_llms_txt_groups_by_section_alphabetically() {
+	guides := &content.Page{
+		title:      'Guides'
+		section:    'guides'
+		is_section: true
+		permalink:  'https://example.com/guides/'
+	}
+	deploying := &content.Page{
+		title:     'Deploying'
+		section:   'guides'
+		permalink: 'https://example.com/guides/deploying/'
+	}
+	ref := &content.Page{
+		title:      'Reference'
+		section:    'reference'
+		is_section: true
+		permalink:  'https://example.com/reference/'
+	}
+	got := build_llms_txt('Verne', 'A small SSG.', [deploying, ref, guides])
+	expected := '# Verne\n\n> A small SSG.\n\n## Guides\n\n- [Guides](https://example.com/guides/index.html.md)\n- [Deploying](https://example.com/guides/deploying/index.html.md)\n\n## Reference\n\n- [Reference](https://example.com/reference/index.html.md)\n'
+	assert got == expected
+}
+
+fn test_build_llms_txt_emits_optional_section_last() {
+	guide := &content.Page{
+		title:     'Guide'
+		section:   'guides'
+		permalink: 'https://example.com/guides/g/'
+	}
+	opt := &content.Page{
+		title:         'Changelog'
+		section:       'meta'
+		permalink:     'https://example.com/changelog/'
+		llms_optional: true
+	}
+	got := build_llms_txt('Verne', '', [opt, guide])
+	expected := '# Verne\n\n## Guides\n\n- [Guide](https://example.com/guides/g/index.html.md)\n\n## Optional\n\n- [Changelog](https://example.com/changelog/index.html.md)\n'
+	assert got == expected
+}
+
+fn test_build_llms_txt_skips_home_from_groups() {
+	home := &content.Page{
+		title:     'Verne'
+		is_home:   true
+		permalink: 'https://example.com/'
+	}
+	got := build_llms_txt('Verne', 'A small SSG.', [home])
+	// Home is represented by H1 + blockquote, must not appear under any H2.
+	assert got == '# Verne\n\n> A small SSG.\n'
 }
 
 fn test_sort_section_pages_puts_index_first_then_date_desc() {

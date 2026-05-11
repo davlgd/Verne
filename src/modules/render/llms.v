@@ -1,16 +1,20 @@
 // llms generates the llmstxt.org outputs alongside the HTML build:
 //   - a per-page markdown twin written next to each `index.html` as
-//     `index.html.md` (header H1 + emphasised description + body markdown),
-//   - `/llms.txt` at the output root, a curated index following the
-//     llmstxt.org standard (H1 site, blockquote summary, H2 per section,
-//     bullet list of `[title](url): description` per page),
+//     `index.html.md` (H1 title + emphasised description + body markdown),
+//     matching the companion-file proposal from the llms.txt spec,
+//   - `/llms.txt` at the output root, a curated index conforming to the
+//     llms.txt standard (H1 site, blockquote summary, one H2 per section,
+//     bullet list of `[title](url): description` per page, optional
+//     trailing `## Optional` H2 for pages marked `llms: optional`),
 //   - `/llms-full.txt` at the output root, every included page's markdown
-//     twin concatenated with `---` horizontal-rule separators.
+//     twin concatenated with `---` horizontal-rule separators. The name is
+//     community convention (Anthropic, Stripe, …), not part of the spec.
 //
 // The whole feature can be disabled site-wide with `llms: { enabled: false }`
-// in `verne.yaml`. Individual pages opt out with `llms: false` in their
-// frontmatter — they then receive no `.html.md`, are absent from
-// `llms-full.txt`, and are not listed in `llms.txt`.
+// in `verne.yaml`. Per-page knobs in frontmatter:
+//   - `llms: false`    — fully excluded (no twin, absent from both indexes)
+//   - `llms: optional` — listed under `## Optional`, still in llms-full.txt
+//   - `llms: true`     — explicit default (same as omitting the key)
 module render
 
 import os
@@ -23,8 +27,7 @@ fn (r &Renderer) write_page_md(p &content.Page, html_path string) ! {
 	if !r.cfg.llms_enabled || p.llms_excluded {
 		return
 	}
-	md_path := html_path + '.md'
-	os.write_file(md_path, page_md(p))!
+	os.write_file(html_path + '.md', page_md(p))!
 }
 
 // write_llms_index emits `/llms.txt` and `/llms-full.txt` at the output
@@ -35,7 +38,9 @@ fn (mut r Renderer) write_llms_index() ! {
 		return
 	}
 	included := llms_included_pages(r.site.pages)
-	os.write_file(os.join_path(r.output_dir, 'llms.txt'), r.build_llms_txt(included))!
+	title := r.llms_site_title()
+	desc := r.llms_site_description()
+	os.write_file(os.join_path(r.output_dir, 'llms.txt'), build_llms_txt(title, desc, included))!
 	os.write_file(os.join_path(r.output_dir, 'llms-full.txt'), build_llms_full(included))!
 }
 
@@ -45,10 +50,9 @@ fn (mut r Renderer) write_llms_index() ! {
 fn llms_included_pages(pages []&content.Page) []&content.Page {
 	mut out := []&content.Page{cap: pages.len}
 	for p in pages {
-		if p.llms_excluded {
-			continue
+		if !p.llms_excluded {
+			out << p
 		}
-		out << p
 	}
 	return out
 }
@@ -58,15 +62,15 @@ fn llms_included_pages(pages []&content.Page) []&content.Page {
 // Title and description are omitted when empty so a body-only page does not
 // pick up stray blank header lines.
 fn page_md(p &content.Page) string {
-	mut parts := []string{cap: 5}
-	if p.title.len > 0 {
+	mut parts := []string{cap: 3}
+	if p.title != '' {
 		parts << '# ${p.title}'
 	}
-	if p.description.len > 0 {
+	if p.description != '' {
 		parts << '_${p.description}_'
 	}
 	body := p.body_md.trim_space()
-	if body.len > 0 {
+	if body != '' {
 		parts << body
 	}
 	if parts.len == 0 {
@@ -76,13 +80,17 @@ fn page_md(p &content.Page) string {
 }
 
 // build_llms_full concatenates every included page's markdown twin into a
-// single document, separated by horizontal rules so an LLM can chunk on the
-// boundary without confusing sibling pages.
+// single document separated by horizontal rules. Pages appear in the same
+// order as `/llms.txt`: home first (so the file opens with the site's
+// introduction), then each section alphabetically — section index first,
+// then date desc, then title asc — then any `llms: optional` pages last,
+// mirroring the trailing `## Optional` H2 in the curated index.
 fn build_llms_full(pages []&content.Page) string {
-	mut out := []string{cap: pages.len}
-	for p in pages {
+	ordered := canonical_page_order(pages, true)
+	mut out := []string{cap: ordered.len}
+	for p in ordered {
 		md := page_md(p)
-		if md.len == 0 {
+		if md == '' {
 			continue
 		}
 		out << md.trim_right('\n')
@@ -90,43 +98,97 @@ fn build_llms_full(pages []&content.Page) string {
 	return out.join('\n\n---\n\n') + '\n'
 }
 
-// build_llms_txt renders the curated index: H1 site title, blockquote
-// summary (cfg.params.description or .tagline), then one H2 group per
-// section listing each page as a bullet.
-fn (r &Renderer) build_llms_txt(pages []&content.Page) string {
+// build_llms_txt renders the curated index per the llms.txt standard: H1
+// site title, optional blockquote summary, one H2 per section listing each
+// page as a bullet, then a trailing `## Optional` H2 grouping every page
+// flagged `llms: optional` in frontmatter (the spec-reserved section name
+// for skippable URLs).
+fn build_llms_txt(site_title string, site_description string, pages []&content.Page) string {
 	mut sb := []string{cap: 32}
-	sb << '# ${r.llms_site_title()}'
-	desc := r.llms_site_description()
-	if desc.len > 0 {
+	sb << '# ${site_title}'
+	if site_description != '' {
 		sb << ''
-		sb << '> ${desc}'
+		sb << '> ${site_description}'
 	}
-	mut groups := map[string][]&content.Page{}
-	for p in pages {
-		// The home page is already represented by the H1 + blockquote;
-		// listing it under its own group would just duplicate the site
-		// title.
-		if p.is_home {
-			continue
-		}
-		key := p.section
-		mut bucket := groups[key] or { []&content.Page{} }
-		bucket << p
-		groups[key] = bucket
-	}
-	mut keys := groups.keys()
+	b := bucket_pages(pages)
+	mut keys := b.groups.keys()
 	keys.sort()
 	for key in keys {
-		bucket := groups[key] or { continue }
-		title := llms_section_title(key, bucket)
-		sb << ''
-		sb << '## ${title}'
-		sb << ''
-		for p in sort_section_pages(bucket) {
-			sb << bullet_for(p)
-		}
+		bucket := b.groups[key] or { continue }
+		emit_h2_bullets(mut sb, llms_section_title(key, bucket), bucket)
+	}
+	if b.optional.len > 0 {
+		emit_h2_bullets(mut sb, 'Optional', b.optional)
 	}
 	return sb.join('\n') + '\n'
+}
+
+// emit_h2_bullets appends an `## H2` block followed by one bullet per page
+// in canonical order. Shared between regular sections and the trailing
+// `## Optional` block so both render identically.
+fn emit_h2_bullets(mut sb []string, title string, bucket []&content.Page) {
+	sb << ''
+	sb << '## ${title}'
+	sb << ''
+	for p in sort_section_pages(bucket) {
+		sb << bullet_for(p)
+	}
+}
+
+// PageBuckets is the grouped view both `build_llms_txt` and
+// `canonical_page_order` consume: home (if any) on its own, regular pages
+// grouped by section, `llms: optional` pages collected separately. Built
+// once per call via `bucket_pages`.
+struct PageBuckets {
+mut:
+	home     &content.Page = unsafe { nil }
+	groups   map[string][]&content.Page
+	optional []&content.Page
+}
+
+// bucket_pages partitions a flat page list into home / per-section / optional
+// buckets. Used by both /llms.txt and /llms-full.txt so the two files agree
+// on which page belongs where.
+fn bucket_pages(pages []&content.Page) PageBuckets {
+	mut b := PageBuckets{}
+	for p in pages {
+		if p.is_home {
+			b.home = p
+			continue
+		}
+		if p.llms_optional {
+			b.optional << p
+			continue
+		}
+		mut bucket := b.groups[p.section] or { []&content.Page{} }
+		bucket << p
+		b.groups[p.section] = bucket
+	}
+	return b
+}
+
+// canonical_page_order flattens the bucketed view into a single ordered
+// list: home (if `include_home`), then sections alphabetically, then
+// optional pages. Used by `/llms-full.txt`; `/llms.txt` consumes the same
+// buckets directly to emit H2 boundaries.
+fn canonical_page_order(pages []&content.Page, include_home bool) []&content.Page {
+	b := bucket_pages(pages)
+	mut keys := b.groups.keys()
+	keys.sort()
+	mut out := []&content.Page{cap: pages.len}
+	if include_home && !isnil(b.home) {
+		out << b.home
+	}
+	for key in keys {
+		bucket := b.groups[key] or { continue }
+		for p in sort_section_pages(bucket) {
+			out << p
+		}
+	}
+	for p in sort_section_pages(b.optional) {
+		out << p
+	}
+	return out
 }
 
 // sort_section_pages returns a bucket's pages with the section index first
@@ -156,15 +218,27 @@ fn sort_section_pages(bucket []&content.Page) []&content.Page {
 }
 
 fn bullet_for(p &content.Page) string {
-	url := if p.permalink.len > 0 { p.permalink } else { p.rel_permalink }
-	if p.description.len > 0 {
+	url := md_url_for(p)
+	if p.description != '' {
 		return '- [${p.title}](${url}): ${p.description}'
 	}
 	return '- [${p.title}](${url})'
 }
 
+// md_url_for returns the URL of the page's `.html.md` twin — the file
+// browsers can fetch to receive the page's body as markdown. The llms.txt
+// standard expects bullets to point at markdown-ready resources, not at
+// the HTML pages humans navigate to.
+fn md_url_for(p &content.Page) string {
+	base := if p.permalink != '' { p.permalink } else { p.rel_permalink }
+	if base.ends_with('/') {
+		return base + 'index.html.md'
+	}
+	return base + '/index.html.md'
+}
+
 fn (r &Renderer) llms_site_title() string {
-	if r.cfg.title.len > 0 {
+	if r.cfg.title != '' {
 		return r.cfg.title
 	}
 	return 'Site'
@@ -174,7 +248,7 @@ fn (r &Renderer) llms_site_description() string {
 	for key in ['description', 'tagline'] {
 		if v := r.cfg.params[key] {
 			s := v.str_or('')
-			if s.len > 0 {
+			if s != '' {
 				return s
 			}
 		}
@@ -184,11 +258,12 @@ fn (r &Renderer) llms_site_description() string {
 
 // llms_section_title resolves a section key to a human-readable H2 label.
 // Prefers the section's `_index.md` title when authored, falls back to the
-// slug with dashes/slashes turned into spaces and each word capitalised.
-// The empty key (home-anchored pages with no section) becomes "Home".
+// slug with separators (`-`, `_`, `/`) turned into spaces and each word
+// capitalised. The empty key (top-level pages outside any section)
+// becomes "Home".
 fn llms_section_title(key string, bucket []&content.Page) string {
 	for p in bucket {
-		if p.is_section && p.title.len > 0 {
+		if p.is_section && p.title != '' {
 			return p.title
 		}
 	}
@@ -199,20 +274,5 @@ fn llms_section_title(key string, bucket []&content.Page) string {
 }
 
 fn humanise_section_key(key string) string {
-	mut buf := []u8{cap: key.len}
-	mut capitalise_next := true
-	for c in key {
-		if c == `-` || c == `_` || c == `/` {
-			buf << ` `
-			capitalise_next = true
-			continue
-		}
-		if capitalise_next && c >= `a` && c <= `z` {
-			buf << c - 32
-		} else {
-			buf << c
-		}
-		capitalise_next = false
-	}
-	return buf.bytestr()
+	return key.replace_each(['-', ' ', '_', ' ', '/', ' ']).title()
 }
