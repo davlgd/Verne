@@ -29,6 +29,7 @@ pub mut:
 	tags            []string
 	is_home         bool
 	is_section      bool
+	llms_excluded   bool // page opts out of llms.txt outputs via `llms: false`
 	params          map[string]yaml.Value
 	base_filename   string
 	layout          string
@@ -71,6 +72,15 @@ pub fn load_page(root string, abs_path string, section string, frontmatter_date_
 				if list := v.as_list() {
 					for el in list {
 						p.tags << el.str_or('')
+					}
+				}
+			}
+			'llms' {
+				// `llms: false` opts the page out of llms.txt outputs.
+				// `llms: true` (and any non-bool value) leaves it included.
+				if b := v.as_bool() {
+					if !b {
+						p.llms_excluded = true
 					}
 				}
 			}

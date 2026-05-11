@@ -139,12 +139,14 @@ pub fn (mut r Renderer) build() !int {
 		out_path := r.output_path_for(p)
 		html := r.render_page(p, site_obj) or { return error('render: ${p.source_path}: ${err}') }
 		os.mkdir_all(os.dir(out_path))!
+		r.write_page_md(p, out_path)!
 		os.write_file(out_path, html)!
 		count++
 	}
 	r.copy_static()!
 	r.write_404(site_obj)!
 	r.render_extras(site_obj)!
+	r.write_llms_index()!
 	return count
 }
 

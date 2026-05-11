@@ -39,6 +39,7 @@ pub mut:
 	theme           string
 	enable_robots   bool = true
 	enable_emoji    bool
+	llms_enabled    bool = true // emit /llms.txt, /llms-full.txt and per-page .html.md twins
 	frontmatter_map map[string][]string
 	permalinks      map[string]string
 	taxonomies      map[string]string
@@ -111,6 +112,13 @@ fn parse_config(doc map[string]yaml.Value, path string, root string) !Config {
 	}
 	if v := doc['enableEmoji'] {
 		cfg.enable_emoji = bool_of(v)
+	}
+	if v := doc['llms'] {
+		if m := v.as_map() {
+			if e := m['enabled'] {
+				cfg.llms_enabled = bool_of(e)
+			}
+		}
 	}
 	if v := doc['frontmatter'] {
 		if m := v.as_map() {

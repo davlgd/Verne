@@ -38,6 +38,12 @@ each documented key has a fixed type and meaning.
 - **`params`** — *map, default `{}`.* Free-form values exposed as
   `site.params.*`. Theme-specific extras (tagline, socials, UI strings,
   etc.) live here.
+- **`llms`** — *map, default `{enabled: true}`.* Controls the
+  [llmstxt.org](https://llmstxt.org/) outputs: `llms.txt` (curated
+  index), `llms-full.txt` (concatenated bodies), and a per-page
+  `<page>.html.md` markdown twin written next to each `index.html`. Set
+  `enabled: false` to disable the whole feature site-wide. Per-page
+  opt-out lives in frontmatter (`llms: false`).
 - **`markup`**, **`outputs`**, **`security`** — *maps, default `{}`.*
   Reserved keys: parsed if present so a future Verne release can pick
   them up, but currently unused. Setting them today has no effect.

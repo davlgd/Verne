@@ -62,6 +62,14 @@ pub fn (v Value) as_map() ?map[string]Value {
 	}
 }
 
+// as_bool returns the value as a bool, or none if it is another variant.
+pub fn (v Value) as_bool() ?bool {
+	return match v {
+		bool { v }
+		else { none }
+	}
+}
+
 struct Line {
 	num     int
 	indent  int
