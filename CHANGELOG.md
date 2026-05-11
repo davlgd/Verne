@@ -5,6 +5,34 @@ All notable changes to Verne will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-11
+
+### Added
+
+- Native [llms.txt](https://llmstxt.org/) outputs alongside every HTML
+  build:
+  - `/llms.txt` — curated index conforming to the llms.txt standard
+    (H1 site title, blockquote summary, one H2 per content section,
+    bullets `[Title](url): description` pointing at the markdown twins).
+  - `/llms-full.txt` — every included page's markdown concatenated and
+    separated by horizontal rules, in the same canonical order as
+    `llms.txt`.
+  - `<page>.html.md` — a self-contained markdown twin written next to
+    each `index.html`, matching the companion-file proposal from the
+    spec.
+  - Per-page frontmatter `llms: false` to exclude a page from every
+    output; site-wide toggle `llms: { enabled: false }` in
+    `verne.yaml`.
+- `## Optional` H2 section in `llms.txt` for pages flagged
+  `llms: optional` in frontmatter — the spec-reserved bucket for URLs
+  an LLM may skip when a shorter context is needed.
+- `sws.toml` example for Clever Cloud / static-web-server deployments,
+  declaring `charset=utf-8` on `text/plain` and `text/markdown`
+  responses so UTF-8 content in `.txt` / `.md` files no longer renders
+  as mojibake in browsers.
+- `yaml.Value.as_bool()` helper, symmetric with `as_string` /
+  `as_list` / `as_map`.
+
 ## [0.1.0] - 2026-05-05
 
 Initial public release.
