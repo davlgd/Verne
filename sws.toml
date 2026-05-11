@@ -1,0 +1,16 @@
+# static-web-server configuration — Clever Cloud static runtime.
+#
+# sws follows RFC 6657 and does not add a `charset` parameter to `text/*`
+# responses by default. For files we know are UTF-8 (everything Verne
+# emits), we override the Content-Type header so browsers stop falling
+# back to Windows-1252 on plain-text resources.
+
+[advanced]
+
+[[advanced.headers]]
+source = "**/*.txt"
+headers = { Content-Type = "text/plain; charset=utf-8" }
+
+[[advanced.headers]]
+source = "**/*.md"
+headers = { Content-Type = "text/markdown; charset=utf-8" }
