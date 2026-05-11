@@ -30,6 +30,7 @@ pub mut:
 	is_home         bool
 	is_section      bool
 	llms_excluded   bool // page opts out of llms.txt outputs via `llms: false`
+	llms_optional   bool // page is listed under `## Optional` in llms.txt via `llms: optional`
 	params          map[string]yaml.Value
 	base_filename   string
 	layout          string
@@ -77,10 +78,17 @@ pub fn load_page(root string, abs_path string, section string, frontmatter_date_
 			}
 			'llms' {
 				// `llms: false` opts the page out of llms.txt outputs.
-				// `llms: true` (and any non-bool value) leaves it included.
+				// `llms: optional` files it under the spec-reserved
+				// `## Optional` H2 in /llms.txt (URLs an LLM may skip
+				// for a shorter context).
+				// `llms: true` (and any other value) leaves it included.
 				if b := v.as_bool() {
 					if !b {
 						p.llms_excluded = true
+					}
+				} else if s := v.as_string() {
+					if s == 'optional' {
+						p.llms_optional = true
 					}
 				}
 			}
