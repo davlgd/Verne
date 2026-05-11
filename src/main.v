@@ -1589,6 +1589,7 @@ fn header_for(path string) http.Header {
 		'.woff2' { 'font/woff2' }
 		'.xml' { 'application/xml; charset=utf-8' }
 		'.txt' { 'text/plain; charset=utf-8' }
+		'.md' { 'text/markdown; charset=utf-8' }
 		else { 'application/octet-stream' }
 	}
 
