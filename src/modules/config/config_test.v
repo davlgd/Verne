@@ -2,19 +2,84 @@ module config
 
 import os
 
-fn test_load_labs_config() {
-	root := os.dir(os.dir(os.dir(@FILE))) + '/..'
-	cfg := load(root) or {
-		eprintln('skipping: ${err}')
-		return
+// The alias table, the permalink map and the taxonomy map are reachable
+// only through a loaded config, so they get a fixture of their own. The
+// values are the shape of a real site (the one this test used to read from
+// disk, and skip when it was not there).
+fn test_aliases_permalinks_and_taxonomies() {
+	path := write_config('full-shape', '
+title: "davlgd tech blog"
+baseURL: "https://labs.davlgd.com/"
+locale: "en-us"
+theme: "terminal-garden"
+
+frontmatter:
+  date:
+    - pubDatetime
+    - date
+  summary:
+    - description
+
+permalinks:
+  posts: "/posts/:contentbasename/"
+
+taxonomies:
+  tag: "tags"
+')!
+	defer {
+		os.rmdir_all(os.dir(path)) or {}
 	}
-	assert cfg.base_url == 'https://labs.davlgd.com/'
-	assert cfg.theme == 'terminal-garden'
+	cfg := load_file(path)!
 	assert cfg.title == 'davlgd tech blog'
+	assert cfg.base_url == 'https://labs.davlgd.com/'
 	assert cfg.locale == 'en-us'
-	assert 'pubDatetime' in cfg.frontmatter_map['date']
+	assert cfg.theme == 'terminal-garden'
+	assert cfg.frontmatter_map['date'] == ['pubDatetime', 'date']
+	assert cfg.frontmatter_map['summary'] == ['description']
 	assert cfg.permalinks['posts'] == '/posts/:contentbasename/'
 	assert cfg.taxonomies['tag'] == 'tags'
+}
+
+// Every other test here calls `load_file`; these three cover `load`, which
+// is the entry point the CLI actually uses.
+fn test_load_discovers_the_config_in_a_directory() {
+	path := write_config('discovery', 'title: "Discovered"\ntheme: "any"\n')!
+	dir := os.dir(path)
+	defer {
+		os.rmdir_all(dir) or {}
+	}
+	cfg := load(dir)!
+	assert cfg.title == 'Discovered'
+	assert cfg.source_path == path
+	assert cfg.root == dir
+}
+
+fn test_load_accepts_the_yml_spelling() {
+	dir := os.join_path(os.temp_dir(), 'verne-config-yml-spelling')
+	os.rmdir_all(dir) or {}
+	os.mkdir_all(dir)!
+	defer {
+		os.rmdir_all(dir) or {}
+	}
+	path := os.join_path(dir, 'verne.yml')
+	os.write_file(path, 'title: "Short suffix"\ntheme: "any"\n')!
+	cfg := load(dir)!
+	assert cfg.title == 'Short suffix'
+	assert cfg.source_path == path
+}
+
+fn test_load_reports_a_directory_without_a_config() {
+	dir := os.join_path(os.temp_dir(), 'verne-config-no-file')
+	os.rmdir_all(dir) or {}
+	os.mkdir_all(dir)!
+	defer {
+		os.rmdir_all(dir) or {}
+	}
+	if _ := load(dir) {
+		assert false, 'expected a directory with no verne.yaml to fail'
+	} else {
+		assert err.msg().contains('no verne.yaml found')
+	}
 }
 
 fn test_summary_parsing() {
@@ -116,14 +181,15 @@ summary:
 	// are treated as front-matter (Welcome) and get no number; numbering
 	// starts at the first chapter inside the first Part. Children are
 	// scoped to parent.
-	assert cfg.summary[0].chapter_no == '' // Welcome (front-matter)
-	assert cfg.summary[1].chapter_no == '' // header
-	assert cfg.summary[2].chapter_no == '1' // Installation
-	assert cfg.summary[2].children[0].chapter_no == '1.1' // macOS
-	assert cfg.summary[2].children[1].chapter_no == '1.2' // Linux
-	assert cfg.summary[3].chapter_no == '2' // Templates
-	assert cfg.summary[3].children[0].chapter_no == '2.1' // Filters
-	assert cfg.summary[3].children[0].children[0].chapter_no == '2.1.1' // String
+	// Welcome (front-matter), then the header row, then the chapters.
+	assert cfg.summary[0].chapter_no == ''
+	assert cfg.summary[1].chapter_no == ''
+	assert cfg.summary[2].chapter_no == '1'
+	assert cfg.summary[2].children[0].chapter_no == '1.1'
+	assert cfg.summary[2].children[1].chapter_no == '1.2'
+	assert cfg.summary[3].chapter_no == '2'
+	assert cfg.summary[3].children[0].chapter_no == '2.1'
+	assert cfg.summary[3].children[0].children[0].chapter_no == '2.1.1'
 	assert cfg.summary[3].children[0].children.len == 1
 	assert cfg.summary[3].children[0].children[0].title == 'String'
 	assert cfg.summary[3].children[0].children[0].url == '/templates/filters/string/'
