@@ -11,31 +11,45 @@ template DSL (Tera-flavoured) and a dual V/HTML shortcode system. It exists
 to render `labs.davlgd.com` and to be reusable as a standalone SSG by other
 projects.
 
+The repository also carries Verne sites of its own, all built by the binary
+it produces: `docs/` (www.verne-ssg.org) and three example sites under
+`examples/`. `mise run build-doc`, `mise run serve-doc` and `mise run
+serve-all` drive them.
+
 When in doubt about a feature: if the labs site does not need it and the
 DSL spec does not require it, do not implement it. Add a TODO instead.
 
 ## Code conventions
 
 - **V style**: `v fmt -w` everything. No exceptions.
-- **No external V dependencies**. Standard library only (`os`, `time`,
-  `strings`, `regex`, `json2`, `crypto.sha256`, `net.http` for the dev
-  server).
+- **No external V dependencies**. Standard library only — today that is
+  `os`, `time`, `strings`, `crypto.sha256`, `encoding.base64`, `x.json2`,
+  and `net` / `net.http` / `net.urllib` for the dev server and the remote
+  fetch.
 - **Modules are flat** under `src/modules/<name>/`, siblings of `src/main.v`,
   so V resolves them as local imports without `VMODULES`. Each module has a
   `*_test.v` next to its source files. Tests are run with `mise run test`
   (i.e. `v test src/`) from the repo root.
 - **Public API**: only export what is needed. V's lowercase = private.
 - **Errors**: return `!Type` and propagate with `?`/`!`. No panics in
-  libraries. The CLI in `src/` is the only place that may `eprintln` and
-  `exit(1)`.
+  libraries. Outside test code, `src/main.v` is the only place that may
+  `eprintln` and `exit(1)`; a `_test.v` may `eprintln` to explain a case it
+  skips.
 - **Comments**: prose comments inside function bodies are reserved for the
   *why* (a hidden constraint, an invariant, a workaround) — names carry the
   *what*. The exception is **`pub fn` docstrings**: `v vet` requires every
   public function to be preceded by a `// name …` doc line, the same role as
   jsdoc/godoc. Keep them to a single sentence describing the contract.
-- **One responsibility per module**. Cross-module imports go one way:
-  `cli → render → {content, template, assets, mdrender, config, remote,
-  highlight}`.
+- **One responsibility per module**. Cross-module imports go one way, and
+  the graph is acyclic:
+
+  ```
+  cli (src/main.v) → config, content, highlight, meta, render
+  render           → assets, config, content, mdrender, template, yaml
+  content          → config, frontmatter, mdrender, meta, remote, template, yaml
+  mdrender         → highlight
+  config, frontmatter → yaml
+  ```
 - **Module names describe roles, not versions**. No `v2`, `v3` suffixes.
 
 ## Module map
@@ -61,10 +75,14 @@ and the template engine: it exposes `Site` and `Page` as lazy
 
 ## Testing rules
 
-- Every module ships with tests **before** it is declared functional.
+- Every module ships with tests **before** it is declared functional. Two
+  gaps predate the rule: `meta` (two constants) and `assets` (owed one —
+  write it if you touch the module).
 - Prefer table-driven tests (V supports them via `[]struct{}` arrays).
-- A user-facing PR is not done until `mise run test` is green and the labs
-  site at `/Users/davlgd/Documents/GitHub/labs` still builds end-to-end via
+- A user-facing PR is not done until `mise run test` is green, the in-repo
+  sites still build (`mise run build-doc`, plus `verne build examples/<site>`
+  when the change touches themes or the shared bundle), and the labs site at
+  `/Users/davlgd/Documents/GitHub/labs` still builds end-to-end via
   `verne build`.
 
 ## DSL — the hard constraints
@@ -102,9 +120,12 @@ The labs `terminal-garden` theme drives the spec. The engine MUST support:
 
 ## Themes share JS — never duplicate it
 
-Verne ships several example themes under `examples/<theme>/themes/<theme>/`.
-They share a canonical pile of front-end utilities under
-`examples/_shared/`, symlinked into each project as `themes/_shared/`. The
+Verne ships several example themes under `examples/<site>/themes/<theme>/`,
+plus the documentation theme in `docs/themes/vernedocs/`. They share a
+canonical pile of front-end utilities under `examples/_shared/`, symlinked
+into the sites that use it as `themes/_shared/` (`examples/verneblog`,
+`examples/vernebook` and `docs/`; `examples/vernestart` deliberately ships
+a standalone theme with no shared bundle). The
 engine, in `render.bundle_assets()`, alphabetically concatenates every
 `.js` file from `themes/_shared/assets/js/` *before* the theme's own
 `assets/js/app.js`, and `template.add_root` registers
@@ -144,7 +165,7 @@ Conventions for theme authors:
 - **localStorage keys are namespaced `verne:*`** (e.g. `verne:theme`,
   `verne:sidebar`) so themes share state — never `<theme>:theme`.
 
-When a third theme is added, audit `_shared/` first; only land theme-only
+When a new theme is added, audit `_shared/` first; only land theme-only
 behaviour in the new theme's `app.js`.
 
 ## Reviewing your own work
