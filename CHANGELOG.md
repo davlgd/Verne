@@ -5,6 +5,25 @@ All notable changes to Verne will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `verne help` and `verne <subcommand> --help` now read from a single
+  command table, so a subcommand's one-line summary and its detailed page
+  cannot drift apart. Every per-subcommand page opens with a `Usage:` line
+  and a paragraph describing what the command actually does.
+- Subcommand summaries now match the behaviour: `verne server` renders the
+  site *and* serves it, `verne build` renders (assets, sitemap, RSS,
+  `llms.txt`) rather than just "builds".
+
+### Fixed
+
+- `verne help init` no longer advertises `-r/--root` and `-c/--config`:
+  `init` never accepted them.
+- `verne help clean` described `-o` as replacing `cfg.output_dir`, an
+  internal field no `verne.yaml` key can set; it now says `<DIR>/public`.
+
 ## [0.2.0] - 2026-05-11
 
 ### Added

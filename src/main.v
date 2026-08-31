@@ -23,26 +23,18 @@ fn main() {
 	}
 	cmd := args[0]
 	rest := args[1..]
-	// Intercept `--help`/`-h` after a known subcommand so `verne build --help`
-	// prints the topic-specific help instead of erroring as an unknown flag.
-	if rest.len > 0 && rest[0] in ['--help', '-h']
-		&& cmd in ['init', 'build', 'server', 'serve', 'clean'] {
-		print_help(if cmd == 'serve' { 'server' } else { cmd })
+	topic := if cmd == 'serve' { 'server' } else { cmd }
+	if _ := find_command(topic) {
+		// Intercept `--help`/`-h` after a known subcommand so `verne build --help`
+		// prints the topic-specific help instead of erroring as an unknown flag.
+		if rest.len > 0 && rest[0] in ['--help', '-h'] {
+			print_help(topic)
+			return
+		}
+		run_command(topic, rest) or { fail(err) }
 		return
 	}
 	match cmd {
-		'build' {
-			cmd_build(rest) or { fail(err) }
-		}
-		'server', 'serve' {
-			cmd_server(rest) or { fail(err) }
-		}
-		'clean' {
-			cmd_clean(rest) or { fail(err) }
-		}
-		'init' {
-			cmd_init(rest) or { fail(err) }
-		}
 		'version' {
 			println('verne ${meta.version}')
 		}
@@ -51,13 +43,15 @@ fn main() {
 			exit(2)
 		}
 		'help', '--help', '-h' {
-			topic := if rest.len > 0 { rest[0] } else { '' }
-			normalised := if topic == 'serve' { 'server' } else { topic }
-			if normalised != '' && normalised !in ['init', 'build', 'server', 'clean'] {
-				eprintln('verne: unknown help topic `${topic}` (expected init, build, server, or clean)')
-				exit(2)
+			asked := if rest.len > 0 { rest[0] } else { '' }
+			wanted := if asked == 'serve' { 'server' } else { asked }
+			if wanted != '' {
+				find_command(wanted) or {
+					eprintln('verne: unknown help topic `${asked}` (expected ${command_names()})')
+					exit(2)
+				}
 			}
-			print_help(normalised)
+			print_help(wanted)
 		}
 		else {
 			eprintln('verne: unknown command `${cmd}` — try `verne help`')
@@ -66,69 +60,179 @@ fn main() {
 	}
 }
 
+// run_command dispatches a documented subcommand to its handler. The name
+// must come from the `commands` table (`serve` already normalised to
+// `server`); anything else is a programming error.
+fn run_command(name string, args []string) ! {
+	match name {
+		'init' { cmd_init(args)! }
+		'build' { cmd_build(args)! }
+		'server' { cmd_server(args)! }
+		'clean' { cmd_clean(args)! }
+		else {
+			return error('verne: no handler for `${name}`')
+		}
+	}
+}
+
+// Command is one row of the CLI reference: the synopsis printed by
+// `verne help`, the paragraph printed by `verne help <name>`, and the
+// flags that subcommand accepts. Both pages read the same table, so a
+// one-line summary can never drift from what the command actually does.
+struct Command {
+	name           string
+	args           string
+	summary        string
+	about          string
+	flags          []string
+	accepts_common bool // DIR / -r / -c, printed once as "Common flags"
+}
+
+const common_flags = [
+	'  DIR                   project root (defaults to current directory)',
+	'  -r, --root DIR        same as positional DIR',
+	'  -c, --config FILE     load a specific config file instead of <DIR>/verne.yaml',
+	'                        (mutually exclusive with DIR/-r)',
+]!
+
+const commands = [
+	Command{
+		name: 'init'
+		args: '[DIR] [flags]'
+		summary: 'scaffold a new site (interactive on a TTY)'
+		about: 'Scaffolds a site in DIR (the current directory when omitted): verne.yaml,
+a starter content/ tree, static/, and — unless --theme names a theme you
+provide yourself — a minimal theme under themes/. On a TTY it prompts for
+title, base URL, locale and tagline; -y takes the defaults instead.
+Existing files are left alone; only --force rewrites verne.yaml.'
+		flags: [
+			'  DIR                   directory to scaffold (defaults to current directory)',
+			'  --title T             site title',
+			'  --theme N             bundle a starter theme named N (default: scaffold one)',
+			'  -u, --base-url URL    site base URL',
+			'  -l, --locale L        content locale (e.g. en-us)',
+			'  --tagline T           short tagline shown on the home page',
+			'  -y, --yes             accept all defaults — skip the interactive prompts',
+			'  -f, --force           scaffold into a non-empty directory (overwrites verne.yaml)',
+		]
+	},
+	Command{
+		name: 'build'
+		args: '[DIR] [flags]'
+		summary: 'render the site into <DIR>/public/'
+		about: 'Renders every page under content/ into <DIR>/public/, together with the
+fingerprinted CSS/JS bundles, the static/ files, 404.html, the sitemap,
+the RSS feed and the llms.txt outputs. The output directory is wiped
+first, so a renamed page leaves nothing stale behind. Needs `chroma` on
+PATH for code highlighting.'
+		accepts_common: true
+		flags: [
+			'  -u, --base-url URL    override the baseURL from verne.yaml',
+			'  -o, --output-dir DIR  override the output directory (defaults to <DIR>/public)',
+		]
+	},
+	Command{
+		name: 'server'
+		args: '[DIR] [flags]'
+		summary: 'render the site, then serve it over HTTP (default :1313)'
+		about: 'Runs the same build as `verne build`, then serves the output directory
+on 127.0.0.1:1313 (or -p PORT) over plain HTTP until you stop it with
+Ctrl-C. Every request reads from disk, so a rebuild started from another
+shell is served without a restart.'
+		accepts_common: true
+		flags: [
+			'  -u, --base-url URL    override the baseURL from verne.yaml',
+			'  -o, --output-dir DIR  override the output directory (defaults to <DIR>/public)',
+			'  -p, --port N          listen port (default 1313)',
+			'  --open                open the served URL in the default browser',
+		]
+	},
+	Command{
+		name: 'clean'
+		args: '[DIR] [flags]'
+		summary: 'remove the build output'
+		about: 'Removes the build output — <DIR>/public, or the directory given to
+-o — and, with --all, the HTTP cache under <DIR>/.cache/. Refuses any
+path that sits outside the project root or that looks like a source tree
+(one holding content/, themes/, .git/ or verne.yaml).'
+		accepts_common: true
+		flags: [
+			'  -o, --output-dir DIR  remove this directory instead of <DIR>/public',
+			'  --all                 also remove caches under <DIR>/.cache/',
+		]
+	},
+]!
+
 fn print_usage() {
 	print_help('')
 }
 
+// command_names lists the documented subcommands for error messages, e.g.
+// `init, build, server, or clean`.
+fn command_names() string {
+	names := []string{len: commands.len, init: commands[index].name}
+	return names[..names.len - 1].join(', ') + ', or ' + names.last()
+}
+
+// find_command returns the table row for a subcommand name, or none when the
+// name is not a documented subcommand.
+fn find_command(name string) ?Command {
+	for c in commands {
+		if c.name == name {
+			return c
+		}
+	}
+	return none
+}
+
 // print_help renders the usage, optionally focused on one subcommand. With an
 // empty topic it prints the full reference (default `verne` and `verne help`
-// behaviour); with `init`, `build`, `server`, or `clean` it prints just that
-// subcommand's flags so `verne help build` and `verne build --help` give a
-// short, on-topic page.
+// behaviour); with a subcommand name it prints what that command does plus
+// only the flags it accepts, so `verne help build` and `verne build --help`
+// give a short, on-topic page.
 fn print_help(topic string) {
 	println('verne ${meta.version} — minimal static site generator')
 	println('')
-	if topic == '' {
+	if cmd := find_command(topic) {
 		println('Usage:')
-		println('  verne init   [DIR] [flags]   scaffold a new site (interactive on a TTY)')
-		println('  verne build  [DIR] [flags]   build the site to <DIR>/public/')
-		println('  verne server [DIR] [flags]   serve <DIR>/public/ over HTTP (default :1313)')
-		println('  verne clean  [DIR] [flags]   remove the build output')
-		println('  verne version                print the version')
-		println('  verne help [SUBCOMMAND]      print full or per-subcommand help')
+		println('  verne ${cmd.name} ${cmd.args}')
 		println('')
-	}
-	if topic == '' || topic in ['init', 'build', 'server', 'clean'] {
-		println('Common flags:')
-		println('  DIR                   project root (defaults to current directory)')
-		println('  -r, --root DIR        same as positional DIR')
-		if topic != 'init' {
-			println('  -c, --config FILE     load a specific config file instead of <DIR>/verne.yaml')
-			println('                        (mutually exclusive with DIR/-r)')
-		}
+		println(cmd.about)
 		println('')
-	}
-	if topic == '' || topic == 'init' {
-		println('init flags:')
-		println('  --title T             site title')
-		println('  --theme N             bundle a starter theme named N (default: scaffold one)')
-		println('  -u, --base-url URL    site base URL')
-		println('  -l, --locale L        content locale (e.g. en-us)')
-		println('  --tagline T           short tagline shown on the home page')
-		println('  -y, --yes             accept all defaults — skip the interactive prompts')
-		println('  -f, --force           scaffold into a non-empty directory (overwrites verne.yaml)')
-		println('')
-	}
-	if topic == '' || topic in ['build', 'server'] {
-		header := if topic == '' { 'build / server flags:' } else { '${topic} flags:' }
-		println(header)
-		println('  -u, --base-url URL    override the baseURL from verne.yaml')
-		println('  -o, --output-dir DIR  override the output directory (defaults to <DIR>/public)')
-	}
-	if topic == '' || topic == 'server' {
-		if topic == '' {
+		if cmd.accepts_common {
+			println('Common flags:')
+			for line in common_flags {
+				println(line)
+			}
 			println('')
-			println('server flags:')
 		}
-		println('  -p, --port N          listen port (default 1313)')
-		println('  --open                open the served URL in the default browser')
+		println('${cmd.name} flags:')
+		for line in cmd.flags {
+			println(line)
+		}
+		return
+	}
+	println('Usage:')
+	for c in commands {
+		println('  verne ${c.name:-6} ${c.args:-15} ${c.summary}')
+	}
+	println('  verne version                print the version')
+	println('  verne help [SUBCOMMAND]      print full or per-subcommand help')
+	println('')
+	println('Common flags (build, server, clean):')
+	for line in common_flags {
+		println(line)
+	}
+	for c in commands {
 		println('')
+		println('${c.name} flags:')
+		for line in c.flags {
+			println(line)
+		}
 	}
-	if topic == '' || topic == 'clean' {
-		println('clean flags:')
-		println('  -o, --output-dir DIR  remove this directory instead of cfg.output_dir')
-		println('  --all                 also remove caches under <DIR>/.cache/')
-	}
+	println('')
+	println('Run `verne help SUBCOMMAND` (or `verne SUBCOMMAND --help`) for what a')
+	println('subcommand does and the flags it takes.')
 }
 
 // load_cfg resolves a project root or explicit config file from CLI args.
@@ -356,8 +460,7 @@ fn cmd_init(args []string) ! {
 		if theme == '' {
 			ans := prompt_with_default('Bundle the default theme? (Y/n)', 'Y')
 			if ans.to_lower().starts_with('n') {
-				theme = prompt_with_default('Theme name (will be referenced from verne.yaml; you provide the files)',
-					'custom')
+				theme = prompt_with_default('Theme name (will be referenced from verne.yaml; you provide the files)', 'custom')
 			}
 		}
 	}
@@ -436,21 +539,7 @@ fn cmd_init(args []string) ! {
 
 fn scaffold_config(title string, theme string, base_url string, locale string, tagline string) string {
 	tag := if tagline == '' { 'A small place on the web.' } else { tagline }
-	return 'title: ${yaml_escape(title)}
-baseURL: ${yaml_escape(base_url)}
-locale: ${yaml_escape(locale)}
-theme: ${yaml_escape(theme)}
-
-permalinks:
-  posts: "/posts/:slug/"
-
-params:
-  tagline: ${yaml_escape(tag)}
-
-  # How many posts to show on the home page. Anything past this number
-  # is reachable from the "All writing →" link. Default: 5.
-  recent_posts_limit: 5
-'
+	return 'title: ${yaml_escape(title)}\nbaseURL: ${yaml_escape(base_url)}\nlocale: ${yaml_escape(locale)}\ntheme: ${yaml_escape(theme)}\n\npermalinks:\n  posts: "/posts/:slug/"\n\nparams:\n  tagline: ${yaml_escape(tag)}\n\n  # How many posts to show on the home page. Anything past this number\n  # is reachable from the "All writing →" link. Default: 5.\n  recent_posts_limit: 5\n'
 }
 
 // yaml_escape produces a safely-quoted YAML scalar. Plain identifiers stay
@@ -1506,10 +1595,10 @@ fn cmd_server(args []string) ! {
 		open_url(url)
 	}
 	mut server := &http.Server{
-		addr:                 addr
-		listener:             listener
+		addr: addr
+		listener: listener
 		show_startup_message: false
-		handler:              FileHandler{
+		handler: FileHandler{
 			root: public_dir
 		}
 	}
@@ -1547,7 +1636,7 @@ fn (h FileHandler) handle(req http.Request) http.Response {
 	if clean.contains('..') {
 		return http.new_response(
 			status: .forbidden
-			body:   'forbidden'
+			body: 'forbidden'
 			header: text_header()
 		)
 	}
@@ -1558,20 +1647,20 @@ fn (h FileHandler) handle(req http.Request) http.Response {
 	if !os.exists(full) {
 		return http.new_response(
 			status: .not_found
-			body:   '404 not found'
+			body: '404 not found'
 			header: text_header()
 		)
 	}
 	body := os.read_file(full) or {
 		return http.new_response(
 			status: .internal_server_error
-			body:   'read error'
+			body: 'read error'
 			header: text_header()
 		)
 	}
 	return http.new_response(
 		status: .ok
-		body:   body
+		body: body
 		header: header_for(full)
 	)
 }
