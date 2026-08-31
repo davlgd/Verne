@@ -34,7 +34,7 @@ pub:
 pub struct Object {
 pub:
 	name   string
-	getter fn (string) ?Value @[required]
+	getter fn(string) ?Value @[required]
 }
 
 // get resolves a field on the object lazily, returning none when the field

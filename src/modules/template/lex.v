@@ -6,9 +6,9 @@ module template
 
 pub enum TokKind {
 	text
-	expr_open  // {{ or {{-
+	expr_open // {{ or {{-
 	expr_close // }} or -}}
-	stmt_open  // {% or {%-
+	stmt_open // {% or {%-
 	stmt_close // %} or -%}
 	ident
 	str
@@ -20,12 +20,12 @@ pub enum TokKind {
 	rparen
 	lbracket
 	rbracket
-	op_eq     // ==
-	op_ne     // !=
-	op_lt     // <
-	op_le     // <=
-	op_gt     // >
-	op_ge     // >=
+	op_eq // ==
+	op_ne // !=
+	op_lt // <
+	op_le // <=
+	op_gt // >
+	op_ge // >=
 	op_assign // =
 	eof
 }
@@ -55,10 +55,10 @@ mut:
 // lex tokenises a template source into the stream consumed by `parse`.
 pub fn lex(src string) ![]Tok {
 	mut l := Lexer{
-		src:  src
-		pos:  0
+		src: src
+		pos: 0
 		line: 1
-		col:  1
+		col: 1
 	}
 	mut out := []Tok{}
 	for l.pos < l.src.len {
@@ -107,7 +107,7 @@ pub fn lex(src string) ![]Tok {
 	out << Tok{
 		kind: .eof
 		line: l.line
-		col:  l.col
+		col: l.col
 	}
 	return out
 }
@@ -197,20 +197,20 @@ fn (mut l Lexer) next_text_or_open() !Tok {
 		if l.pos + 1 < l.src.len && l.src[l.pos + 1] == `#` {
 			// emit text first, then absorb the comment, then continue.
 			tok := Tok{
-				kind:       .text
-				value:      text
-				line:       start_line
-				col:        start_col
+				kind: .text
+				value: text
+				line: start_line
+				col: start_col
 				trim_right: trim_r
 			}
 			l.skip_comment()!
 			return tok
 		}
 		return Tok{
-			kind:       .text
-			value:      text
-			line:       start_line
-			col:        start_col
+			kind: .text
+			value: text
+			line: start_line
+			col: start_col
 			trim_right: trim_r
 		}
 	}
@@ -238,9 +238,9 @@ fn (mut l Lexer) next_text_or_open() !Tok {
 		}
 		l.in_action = true
 		return Tok{
-			kind:      .expr_open
-			line:      open_line
-			col:       open_col
+			kind: .expr_open
+			line: open_line
+			col: open_col
 			trim_left: trim_l
 		}
 	}
@@ -252,9 +252,9 @@ fn (mut l Lexer) next_text_or_open() !Tok {
 		}
 		l.in_action = true
 		return Tok{
-			kind:      .stmt_open
-			line:      open_line
-			col:       open_col
+			kind: .stmt_open
+			line: open_line
+			col: open_col
 			trim_left: trim_l
 		}
 	}
@@ -294,9 +294,9 @@ fn (mut l Lexer) next_action_token() !Tok {
 			l.advance()
 			l.trim_next_text = true
 			return Tok{
-				kind:      .expr_close
-				line:      line
-				col:       col
+				kind: .expr_close
+				line: line
+				col: col
 				trim_left: true
 			}
 		}
@@ -306,9 +306,9 @@ fn (mut l Lexer) next_action_token() !Tok {
 			l.advance()
 			l.trim_next_text = true
 			return Tok{
-				kind:      .stmt_close
-				line:      line
-				col:       col
+				kind: .stmt_close
+				line: line
+				col: col
 				trim_left: true
 			}
 		}
@@ -319,7 +319,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 		return Tok{
 			kind: .expr_close
 			line: line
-			col:  col
+			col: col
 		}
 	}
 	if c == `%` && l.peek(1) == `}` {
@@ -329,7 +329,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 		return Tok{
 			kind: .stmt_close
 			line: line
-			col:  col
+			col: col
 		}
 	}
 	// String literal.
@@ -354,7 +354,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .dot
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`,` {
@@ -362,7 +362,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .comma
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`|` {
@@ -370,7 +370,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .pipe
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`(` {
@@ -378,7 +378,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .lparen
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`)` {
@@ -386,7 +386,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .rparen
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`[` {
@@ -394,7 +394,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .lbracket
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`]` {
@@ -402,7 +402,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 			return Tok{
 				kind: .rbracket
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`=` {
@@ -412,14 +412,14 @@ fn (mut l Lexer) next_action_token() !Tok {
 				return Tok{
 					kind: .op_eq
 					line: line
-					col:  col
+					col: col
 				}
 			}
 			l.advance()
 			return Tok{
 				kind: .op_assign
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`!` {
@@ -429,7 +429,7 @@ fn (mut l Lexer) next_action_token() !Tok {
 				return Tok{
 					kind: .op_ne
 					line: line
-					col:  col
+					col: col
 				}
 			}
 		}
@@ -440,14 +440,14 @@ fn (mut l Lexer) next_action_token() !Tok {
 				return Tok{
 					kind: .op_le
 					line: line
-					col:  col
+					col: col
 				}
 			}
 			l.advance()
 			return Tok{
 				kind: .op_lt
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		`>` {
@@ -457,14 +457,14 @@ fn (mut l Lexer) next_action_token() !Tok {
 				return Tok{
 					kind: .op_ge
 					line: line
-					col:  col
+					col: col
 				}
 			}
 			l.advance()
 			return Tok{
 				kind: .op_gt
 				line: line
-				col:  col
+				col: col
 			}
 		}
 		else {}
@@ -483,10 +483,10 @@ fn (mut l Lexer) read_string(quote u8) !Tok {
 		if c == quote {
 			l.advance()
 			return Tok{
-				kind:  .str
+				kind: .str
 				value: buf.bytestr()
-				line:  line
-				col:   col
+				line: line
+				col: col
 			}
 		}
 		if c == `\\` && l.pos + 1 < l.src.len {
@@ -523,10 +523,10 @@ fn (mut l Lexer) read_number() Tok {
 		l.advance()
 	}
 	return Tok{
-		kind:  .number
+		kind: .number
 		value: buf.bytestr()
-		line:  line
-		col:   col
+		line: line
+		col: col
 	}
 }
 
@@ -539,10 +539,10 @@ fn (mut l Lexer) read_ident() Tok {
 		l.advance()
 	}
 	return Tok{
-		kind:  .ident
+		kind: .ident
 		value: buf.bytestr()
-		line:  line
-		col:   col
+		line: line
+		col: col
 	}
 }
 

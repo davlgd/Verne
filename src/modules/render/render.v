@@ -40,13 +40,13 @@ pub fn new(cfg config.Config, site &content.Site) !&Renderer {
 	}
 	asset_root := os.join_path(theme_root, 'assets')
 	mut r := &Renderer{
-		cfg:           cfg
-		site:          site
-		engine:        template.new()
-		output_dir:    output_dir
-		theme_root:    theme_root
+		cfg: cfg
+		site: site
+		engine: template.new()
+		output_dir: output_dir
+		theme_root: theme_root
 		template_root: template_root
-		pipeline:      assets.new(asset_root, output_dir, cfg.base_url)
+		pipeline: assets.new(asset_root, output_dir, cfg.base_url)
 	}
 	r.engine.add_root(template_root)
 	// Themes may reuse partials from `themes/_shared/templates/`; the
@@ -177,16 +177,25 @@ fn (r &Renderer) base_context(site_obj template.Object) map[string]template.Valu
 fn now_object() template.Object {
 	captured := time.now()
 	return template.Object{
-		name:   'now'
+		name: 'now'
 		getter: fn [captured] (field string) ?template.Value {
 			match field {
-				'year' { return template.Value(i64(captured.year)) }
-				'month' { return template.Value(i64(captured.month)) }
-				'day' { return template.Value(i64(captured.day)) }
-				'unix' { return template.Value(captured.unix()) }
-				else { return none }
-			}
-		}
+				'year' {
+					return template.Value(i64(captured.year))
+				}
+				'month' {
+					return template.Value(i64(captured.month))
+				}
+				'day' {
+					return template.Value(i64(captured.day))
+				}
+				'unix' {
+					return template.Value(captured.unix())
+				}
+				else {
+					return none
+				}
+			}}
 	}
 }
 
@@ -335,9 +344,9 @@ fn (mut r Renderer) write_404(site_obj template.Object) ! {
 	mut ctx := r.base_context(site_obj)
 	// synthesise a minimal 404 page
 	dummy := &content.Page{
-		title:         '404 Page not found'
-		description:   'This page does not exist.'
-		section:       ''
+		title: '404 Page not found'
+		description: 'This page does not exist.'
+		section: ''
 		base_filename: '404'
 	}
 	ctx['page'] = template.Value(dummy.as_template_object())

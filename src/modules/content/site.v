@@ -22,15 +22,15 @@ pub mut:
 	// computed once at build time, sparing templates from doing algorithmic
 	// work (counts, sorts, groupings).
 	popular_tags          []TagBucket // sorted by count desc, then name asc
-	popular_tags_overflow int         // count of tags beyond the visible 23
+	popular_tags_overflow int // count of tags beyond the visible 23
 	tags_by_name          []TagBucket // sorted by name asc
 	posts_stats           PostsStats
 	heatmap_months        []HeatmapCell // one per month between first/last post
-	footer_socials        []SocialLink  // ordered, only the ones configured
-	projects              []Project     // GitHub repos fetched at build time
-	projects_error        string        // empty on success
-	recent_posts          []&Page       // newest-first, capped at recent_posts_limit
-	has_more_posts        bool          // true when total posts > recent_posts_limit
+	footer_socials        []SocialLink // ordered, only the ones configured
+	projects              []Project // GitHub repos fetched at build time
+	projects_error        string // empty on success
+	recent_posts          []&Page // newest-first, capped at recent_posts_limit
+	has_more_posts        bool // true when total posts > recent_posts_limit
 }
 
 // default_recent_posts_limit is the home-page teaser cap when the site
@@ -68,7 +68,7 @@ pub:
 	tag        string // first topic, or lowercased language
 	stars      int
 	status     string // active | inactive | old | archived
-	year       int    // creation year
+	year       int // creation year
 	updated_at string
 	url        string
 }
@@ -273,14 +273,14 @@ fn (mut s Site) fetch_projects() {
 			tag = topics_arr[0].str()
 		}
 		out << Project{
-			name:       name
-			desc:       desc
-			tag:        tag
-			stars:      stars
-			status:     status
-			year:       year
+			name: name
+			desc: desc
+			tag: tag
+			stars: stars
+			status: status
+			year: year
 			updated_at: updated
-			url:        html_url
+			url: html_url
 		}
 	}
 	out.sort_with_compare(fn (a &Project, b &Project) int {
@@ -325,13 +325,13 @@ fn compute_posts_stats(posts []&Page) PostsStats {
 	avg_read := if posts.len > 0 { total_read / posts.len } else { 0 }
 	now_year := time.now().year
 	return PostsStats{
-		total_posts:    posts.len
-		total_words:    total_words
-		avg_words:      avg_words
-		total_read:     total_read
-		avg_read:       avg_read
-		since_year:     earliest.year
-		uptime_years:   if posts.len > 0 { now_year - earliest.year } else { 0 }
+		total_posts: posts.len
+		total_words: total_words
+		avg_words: avg_words
+		total_read: total_read
+		avg_read: avg_read
+		since_year: earliest.year
+		uptime_years: if posts.len > 0 { now_year - earliest.year } else { 0 }
 		last_post_date: latest
 	}
 }
@@ -356,7 +356,7 @@ fn compute_footer_socials(cfg config.Config) []SocialLink {
 			if s.len > 0 {
 				out << SocialLink{
 					label: label
-					url:   s
+					url: s
 				}
 			}
 		}
@@ -374,7 +374,7 @@ fn compute_tag_buckets(posts []&Page) []TagBucket {
 	mut out := []TagBucket{cap: counts.len}
 	for name, count in counts {
 		out << TagBucket{
-			name:  name
+			name: name
 			count: count
 		}
 	}
@@ -412,9 +412,9 @@ fn compute_heatmap(posts []&Page) []HeatmapCell {
 		count := by_month[key] or { 0 }
 		intensity := if max_count > 0 { f64(count) / f64(max_count) } else { 0.0 }
 		cells << HeatmapCell{
-			year:      y
-			month:     m
-			count:     count
+			year: y
+			month: m
+			count: count
 			intensity: intensity
 		}
 		m++
@@ -619,10 +619,10 @@ fn (mut s Site) ensure_home() {
 	}
 	// synthesize empty home
 	s.home = &Page{
-		title:         s.cfg.title
-		section:       ''
+		title: s.cfg.title
+		section: ''
 		base_filename: '_index'
-		is_home:       true
+		is_home: true
 	}
 	s.pages << s.home
 }

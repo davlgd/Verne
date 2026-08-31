@@ -46,7 +46,7 @@ fn test_crlf() {
 }
 
 fn test_bom() {
-	src := '\xEF\xBB\xBF---\ntitle: Hello\n---\nBody.\n'
+	src := '﻿---\ntitle: Hello\n---\nBody.\n'
 	d := parse(src) or { panic(err) }
 	assert must_get(d.meta, 'title') == yaml.Value('Hello')
 	assert d.body == 'Body.\n'

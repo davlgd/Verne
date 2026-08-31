@@ -6,9 +6,9 @@ module template
 import os
 import strings
 
-pub type FilterFn = fn (val Value, args []Value) !Value
+pub type FilterFn = fn(val Value, args []Value) !Value
 
-pub type ShortcodeFn = fn (ctx ShortcodeContext, args map[string]Value) !string
+pub type ShortcodeFn = fn(ctx ShortcodeContext, args map[string]Value) !string
 
 pub struct ShortcodeContext {
 pub:
@@ -23,7 +23,7 @@ mut:
 	filters    map[string]FilterFn
 	shortcodes map[string]ShortcodeFn
 	partials   map[string]string // path → source, lazily filled
-	roots      []string          // directories to search for `include` and shortcodes
+	roots      []string // directories to search for `include` and shortcodes
 }
 
 // new returns a fresh engine with the built-in filters registered.

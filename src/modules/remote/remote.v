@@ -20,7 +20,7 @@ pub:
 	max_body_size int = 5 * 1024 * 1024
 	no_cache      bool
 	cache_dir     string = '.cache/remote'
-	cache_ttl_s   i64    = 3600
+	cache_ttl_s   i64 = 3600
 }
 
 pub struct Response {
@@ -42,9 +42,9 @@ pub fn get(url string, opts Options) !Response {
 		if cached := read_cache(cache_path, opts.cache_ttl_s) {
 			return Response{
 				status_code: 200
-				body:        cached
-				url:         url
-				from_cache:  true
+				body: cached
+				url: url
+				from_cache: true
 			}
 		}
 	}
@@ -66,9 +66,9 @@ pub fn get(url string, opts Options) !Response {
 	}
 	return Response{
 		status_code: resp.status_code
-		body:        resp.body
-		url:         url
-		from_cache:  false
+		body: resp.body
+		url: url
+		from_cache: false
 	}
 }
 

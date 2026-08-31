@@ -66,8 +66,7 @@ fn test_for_with_loop_index() {
 fn test_for_first_last() {
 	mut ctx := map[string]Value{}
 	ctx['xs'] = Value([Value('a'), Value('b'), Value('c')])
-	got :=
-		render('{% for x in xs %}{% if loop.first %}[{% endif %}{{ x }}{% if loop.last %}]{% endif %}{% endfor %}', ctx)
+	got := render('{% for x in xs %}{% if loop.first %}[{% endif %}{{ x }}{% if loop.last %}]{% endif %}{% endfor %}', ctx)
 	assert got == '[abc]', got
 }
 
@@ -138,7 +137,7 @@ fn test_field_access_on_object() {
 	}
 	mut ctx := map[string]Value{}
 	ctx['page'] = Value(Object{
-		name:   'page'
+		name: 'page'
 		getter: getter
 	})
 	assert render('{{ page.title }}', ctx) == 'My Page'

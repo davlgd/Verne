@@ -104,8 +104,8 @@ fn tokenize(src string) []Line {
 			}
 		}
 		out << Line{
-			num:     num
-			indent:  indent
+			num: num
+			indent: indent
 			content: stripped[indent..]
 		}
 	}
@@ -209,8 +209,8 @@ fn (mut p Parser) parse_list(min_indent int) ![]Value {
 			// inline map item: -<sp>key: value [more keys at deeper indent]
 			fake_indent := line.indent + 2
 			p.lines.insert(p.pos, Line{
-				num:     line.num
-				indent:  fake_indent
+				num: line.num
+				indent: fake_indent
 				content: rest
 			})
 			out << Value(p.parse_map(fake_indent)!)
@@ -291,9 +291,15 @@ fn scalar(raw string) Value {
 	}
 	lower := s.to_lower()
 	match lower {
-		'true', 'yes', 'on' { return Value(true) }
-		'false', 'no', 'off' { return Value(false) }
-		'null', '~' { return Value('') }
+		'true', 'yes', 'on' {
+			return Value(true)
+		}
+		'false', 'no', 'off' {
+			return Value(false)
+		}
+		'null', '~' {
+			return Value('')
+		}
 		else {}
 	}
 

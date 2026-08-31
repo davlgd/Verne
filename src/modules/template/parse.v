@@ -241,7 +241,7 @@ fn (mut p Parser) parse_body(terminators []string) !([]Node, string) {
 				nodes << Node(OutputNode{
 					expr: expr
 					line: t.line
-					col:  t.col
+					col: t.col
 				})
 			}
 			.stmt_open {
@@ -330,7 +330,7 @@ fn (mut p Parser) parse_if() !Node {
 	}
 	p.expect(.stmt_close)!
 	return Node(IfNode{
-		branches:  branches
+		branches: branches
 		else_body: else_body
 	})
 }
@@ -359,8 +359,8 @@ fn (mut p Parser) parse_for() !Node {
 	return Node(ForNode{
 		key_var: key_var
 		val_var: val_var
-		source:  src
-		body:    body
+		source: src
+		body: body
 	})
 }
 
@@ -375,9 +375,9 @@ fn (mut p Parser) parse_with() !Node {
 	}
 	p.expect(.stmt_close)!
 	return Node(WithNode{
-		name:   name.value
+		name: name.value
 		source: src
-		body:   body
+		body: body
 	})
 }
 
@@ -397,7 +397,7 @@ fn (mut p Parser) parse_shortcode() !Node {
 		p.expect(.op_assign)!
 		val := p.parse_expression()!
 		args << ShortcodeArg{
-			name:  key.value
+			name: key.value
 			value: val
 		}
 	}
@@ -431,7 +431,7 @@ fn (mut p Parser) parse_shortcode() !Node {
 		args: args
 		body: body
 		line: name.line
-		col:  name.col
+		col: name.col
 	})
 }
 
@@ -447,7 +447,7 @@ fn (mut p Parser) parse_or() !Expr {
 		p.bump()
 		right := p.parse_and()!
 		left = Expr(LogicOr{
-			left:  left
+			left: left
 			right: right
 		})
 	}
@@ -460,7 +460,7 @@ fn (mut p Parser) parse_and() !Expr {
 		p.bump()
 		right := p.parse_not()!
 		left = Expr(LogicAnd{
-			left:  left
+			left: left
 			right: right
 		})
 	}
@@ -491,8 +491,8 @@ fn (mut p Parser) parse_compare() !Expr {
 		}
 		test := p.expect(.ident)!
 		return Expr(IsTest{
-			value:  left
-			test:   test.value
+			value: left
+			test: test.value
 			negate: negate
 		})
 	}
@@ -502,7 +502,7 @@ fn (mut p Parser) parse_compare() !Expr {
 		right := p.parse_filter()!
 		return Expr(InTest{
 			value: left
-			list:  right
+			list: right
 		})
 	}
 	// Comparison operators.
@@ -520,8 +520,8 @@ fn (mut p Parser) parse_compare() !Expr {
 		p.bump()
 		right := p.parse_filter()!
 		return Expr(Compare{
-			op:    op
-			left:  left
+			op: op
+			left: left
 			right: right
 		})
 	}
@@ -562,7 +562,7 @@ fn (mut p Parser) parse_postfix() !Expr {
 			p.bump()
 			f := p.expect(.ident)!
 			left = Expr(FieldAccess{
-				base:  left
+				base: left
 				field: f.value
 			})
 			continue
@@ -573,7 +573,7 @@ fn (mut p Parser) parse_postfix() !Expr {
 			p.expect(.rbracket)!
 			left = Expr(IndexAccess{
 				base: left
-				idx:  idx
+				idx: idx
 			})
 			continue
 		}
@@ -642,7 +642,7 @@ fn (mut p Parser) parse_primary() !Expr {
 			return Expr(VarRef{
 				name: t.value
 				line: t.line
-				col:  t.col
+				col: t.col
 			})
 		}
 		else {

@@ -89,7 +89,7 @@ pub fn load_file(path string) !Config {
 fn parse_config(doc map[string]yaml.Value, path string, root string) !Config {
 	mut cfg := Config{
 		source_path: path
-		root:        root
+		root: root
 	}
 	if v := doc['baseURL'] {
 		raw := v.str_or('')
@@ -233,7 +233,7 @@ fn parse_summary(list []yaml.Value, depth int) ![]SummaryEntry {
 		// can render the group without a visible label or toggle.
 		if h := m['header'] {
 			out << SummaryEntry{
-				title:     h.str_or('')
+				title: h.str_or('')
 				is_header: true
 			}
 			continue

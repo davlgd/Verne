@@ -13,7 +13,7 @@ pub mut:
 // new_scope creates a root scope seeded with the given variables.
 pub fn new_scope(vars map[string]Value) &Scope {
 	return &Scope{
-		vars:   vars.clone()
+		vars: vars.clone()
 		parent: unsafe { nil }
 	}
 }
@@ -30,7 +30,7 @@ fn (s &Scope) lookup(name string) ?Value {
 
 fn child_scope(parent &Scope) &Scope {
 	return &Scope{
-		vars:   map[string]Value{}
+		vars: map[string]Value{}
 		parent: unsafe { parent }
 	}
 }
@@ -346,8 +346,12 @@ fn access_index(base Value, idx Value) !Value {
 
 fn do_compare(l Value, r Value, op string) bool {
 	match op {
-		'==' { return equals(l, r) }
-		'!=' { return !equals(l, r) }
+		'==' {
+			return equals(l, r)
+		}
+		'!=' {
+			return !equals(l, r)
+		}
 		else {}
 	}
 
@@ -438,18 +442,33 @@ fn loop_object(i int, total int) Object {
 	captured_i := i64(i)
 	captured_total := i64(total)
 	return Object{
-		name:   'loop'
+		name: 'loop'
 		getter: fn [captured_i, captured_total] (field string) ?Value {
 			match field {
-				'index' { return Value(captured_i + 1) }
-				'index0' { return Value(captured_i) }
-				'reverse_index' { return Value(captured_total - captured_i) }
-				'reverse_index0' { return Value(captured_total - captured_i - 1) }
-				'first' { return Value(captured_i == 0) }
-				'last' { return Value(captured_i == captured_total - 1) }
-				'length' { return Value(captured_total) }
-				else { return none }
-			}
-		}
+				'index' {
+					return Value(captured_i + 1)
+				}
+				'index0' {
+					return Value(captured_i)
+				}
+				'reverse_index' {
+					return Value(captured_total - captured_i)
+				}
+				'reverse_index0' {
+					return Value(captured_total - captured_i - 1)
+				}
+				'first' {
+					return Value(captured_i == 0)
+				}
+				'last' {
+					return Value(captured_i == captured_total - 1)
+				}
+				'length' {
+					return Value(captured_total)
+				}
+				else {
+					return none
+				}
+			}}
 	}
 }
