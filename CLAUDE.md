@@ -114,7 +114,6 @@ The labs `terminal-garden` theme drives the spec. The engine MUST support:
 - Multilingual (`Languages`, `i18n`)
 - Image processing (`.Resize`, `.Fit`, `.Fill`)
 - PostCSS / JS bundling
-- Live reload (the `verne server` is plain HTTP over `./public/`)
 - Shortcodes inside Markdown content (template-level only for now)
 - Pagination
 

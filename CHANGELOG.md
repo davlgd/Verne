@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `verne server` now watches the sources and hot-reloads the browser.
+  `verne.yaml` and the `content/`, `themes/` and `static/` trees are
+  polled every 400 ms; a change is debounced, rebuilt, and the open page
+  refreshes itself through a small injected poller on `/__verne/reload`.
+  Nothing about live reload reaches the built output — the script and the
+  `no-store` header exist only in the dev server's responses.
+- `verne server --no-watch` keeps the previous behaviour: build once,
+  then serve the output byte-for-byte.
+
 ### Changed
 
 - `verne help` and `verne <subcommand> --help` now read from a single
@@ -16,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subcommand summaries now match the behaviour: `verne server` renders the
   site *and* serves it, `verne build` renders (assets, sitemap, RSS,
   `llms.txt`) rather than just "builds".
+- A `verne server` rebuild renders into `<DIR>/.cache/rebuild/` and swaps
+  it in only on success, so a broken template leaves the last good build
+  being served instead of a half-wiped `public/`.
 
 ### Fixed
 

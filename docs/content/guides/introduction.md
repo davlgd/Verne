@@ -31,6 +31,10 @@ You should be able to read the source in an afternoon.
   `if`/`for`, the answer is a *shortcode* (V code or an HTML partial).
 - Highlights code fences via the external [`chroma`](https://github.com/alecthomas/chroma)
   binary — the only runtime dependency.
+- Serves the result with `verne server`, watching `content/`, `themes/`,
+  `static/` and `verne.yaml` and rebuilding on save; open pages reload
+  themselves once the rebuild lands. No websocket, no bundler — a polled
+  counter and a `<script>` the dev server injects into its own responses.
 
 ## What Verne does not do
 
@@ -38,8 +42,6 @@ You should be able to read the source in an afternoon.
 - **Image processing** (resize, crop, format conversion).
 - **PostCSS / JS bundling** beyond plain concatenation and SHA-256
   fingerprinting (no minification, no source maps).
-- **Live reload** — `verne server` rebuilds before listening, then
-  serves `./public/` over plain HTTP.
 - **Full-text search index** — plug a third-party tool like
   [Pagefind](https://pagefind.app/) into the static output if you need it.
 - **Pagination** — the page graph and the precomputed lists are
