@@ -74,7 +74,10 @@ verne server --open
 ```
 
 `verne server` rebuilds, binds `127.0.0.1:1313`, and `--open` launches
-your default browser at the index page.
+your default browser at the index page. It then keeps watching
+`content/`, `themes/`, `static/` and `verne.yaml`: save a file and the
+site rebuilds and the open page reloads itself. Pass `--no-watch` to
+serve the build as-is instead.
 
 That's it. Add more `.md` files, drop entries into `summary:`, and the
 sidebar stays in sync. When you're ready to ship, run `verne build` and

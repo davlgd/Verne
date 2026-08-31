@@ -61,10 +61,16 @@ VERNE_CHROMA_PATH=.              verne build   # chroma alongside ./verne
 From a Verne site root (`verne.yaml`, `content/`, `themes/`, `static/`):
 
 ```bash
-verne build           # render the site to ./public/
-verne server          # serve ./public/ on http://localhost:1313
-verne server -p 8080  # custom port
+verne build             # render the site to ./public/
+verne server            # build, watch, and serve on http://localhost:1313
+verne server -p 8080    # custom port
+verne server --no-watch # serve the build as-is, no rebuild on change
 ```
+
+`verne server` watches `content/`, `themes/`, `static/` and `verne.yaml`:
+save a file and the site rebuilds, then the open page reloads itself. The
+reload script lives only in the dev server's responses — `verne build`
+output never contains it.
 
 ## Template syntax (mini-Tera)
 

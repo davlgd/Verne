@@ -12,7 +12,7 @@ for what that subcommand does and the flags it takes.
 ```shell
 verne init   [DIR] [flags]   scaffold a new site (interactive on a TTY)
 verne build  [DIR] [flags]   render the site into <DIR>/public/
-verne server [DIR] [flags]   render the site, then serve it over HTTP (default :1313)
+verne server [DIR] [flags]   render the site, then watch and serve it (default :1313)
 verne clean  [DIR] [flags]   remove the build output
 verne version                print the version
 verne help [SUBCOMMAND]      print full or per-subcommand help
@@ -61,11 +61,31 @@ its own root).
 
 Runs the same build as `verne build`, then serves the output directory on
 `127.0.0.1:1313` over plain HTTP until you stop it with Ctrl-C. Inherits
-every `build` flag. Every request reads from disk, so a rebuild started
-from another shell is served without a restart.
+every `build` flag. Unless `--no-watch` is given it then watches the
+sources and rebuilds on save — see [below](#watch-and-live-reload).
 
 - **`-p, --port N`** — listen port (default `1313`)
 - **`--open`** — open the served URL in the default browser
+- **`--no-watch`** — serve the build as-is: no rebuild, no live reload
+
+### Watch and live reload
+
+Unless `--no-watch` is given, the server polls `verne.yaml` and the
+`content/`, `themes/` and `static/` trees every 400 ms (hidden files and
+the output directory excluded). When something changes it waits for the
+tree to settle, rebuilds, and bumps a counter; every page it serves
+carries a small injected `<script>` that polls `/__verne/reload` and
+refreshes the page when that counter moves.
+
+Two properties worth knowing:
+
+- The rebuild renders into `<DIR>/.cache/rebuild/` and swaps it in only
+  once it succeeds, so a typo in a template leaves the last good build
+  being served. The error is printed to the terminal and the next save
+  retries.
+- The reload `<script>` and the `no-store` header exist only in the dev
+  server's responses. `verne build` output is untouched — nothing about
+  live reload ships to production.
 
 ## `verne clean`
 

@@ -14,6 +14,8 @@ import render
 import net
 import net.http
 import net.urllib
+import hash.fnv1a
+import sync.stdatomic
 
 fn main() {
 	args := os.args[1..]
@@ -134,17 +136,19 @@ PATH for code highlighting.'
 	Command{
 		name: 'server'
 		args: '[DIR] [flags]'
-		summary: 'render the site, then serve it over HTTP (default :1313)'
+		summary: 'render the site, then watch and serve it (default :1313)'
 		about: 'Runs the same build as `verne build`, then serves the output directory
 on 127.0.0.1:1313 (or -p PORT) over plain HTTP until you stop it with
-Ctrl-C. Every request reads from disk, so a rebuild started from another
-shell is served without a restart.'
+Ctrl-C. It also watches verne.yaml and the content/, themes/ and static/
+trees: a saved edit rebuilds the site and reloads the open page. Pass
+--no-watch to serve the build as-is instead.'
 		accepts_common: true
 		flags: [
 			'  -u, --base-url URL    override the baseURL from verne.yaml',
 			'  -o, --output-dir DIR  override the output directory (defaults to <DIR>/public)',
 			'  -p, --port N          listen port (default 1313)',
 			'  --open                open the served URL in the default browser',
+			'  --no-watch            serve the build as-is: no rebuild, no live reload',
 		]
 	},
 	Command{
@@ -1500,6 +1504,7 @@ fn cmd_server(args []string) ! {
 	mut base_url := ''
 	mut output_dir := ''
 	mut open_browser := false
+	mut watch := true
 	mut i := 0
 	for i < args.len {
 		a := args[i]
@@ -1516,6 +1521,9 @@ fn cmd_server(args []string) ! {
 			}
 			'--open' {
 				open_browser = true
+			}
+			'--no-watch' {
+				watch = false
 			}
 			'-c', '--config' {
 				i++
@@ -1564,33 +1572,38 @@ fn cmd_server(args []string) ! {
 	if config_file != '' && dir != '' {
 		return error('server: -c/--config and DIR/-r are mutually exclusive (the config file pins its own root)')
 	}
-	mut cfg := load_cfg(dir, config_file)!
-	if base_url != '' {
-		config.validate_base_url(base_url)!
-		cfg.base_url = base_url
+	opts := ServerOptions{
+		dir: dir
+		config_file: config_file
+		base_url: base_url
+		output_dir: output_dir
 	}
-	if output_dir != '' {
-		cfg.output_dir = resolve_output_dir(output_dir, cfg.root)
-	}
-	public_dir := if cfg.output_dir != '' {
-		cfg.output_dir
-	} else {
-		os.join_path(cfg.root, 'public')
-	}
-	render.assert_output_under_root(public_dir, cfg.root)!
+	cfg := resolve_server_cfg(opts)!
 	highlight.ensure_available()!
 	t_start := time.now()
-	site := content.build_site(cfg)!
-	mut renderer := render.new(cfg, site)!
-	count := renderer.build()!
+	count := build_once(cfg)!
 	dur := time.now() - t_start
-	println('Built ${count} pages in ${dur.milliseconds()}ms → ${public_dir}/')
+	println('Built ${count} pages in ${dur.milliseconds()}ms → ${cfg.output_dir}/')
 	addr := '127.0.0.1:${port}'
 	listener := net.listen_tcp(.ip, addr) or {
 		return error('server: cannot bind ${addr} (${err.msg()}) — is port ${port} already in use?')
 	}
 	url := 'http://${addr}/'
-	println('Serving ${public_dir} on ${url}')
+	println('Serving ${cfg.output_dir} on ${url}')
+	// The reload counter is shared with the watcher thread. With --no-watch
+	// the handler never gets one and serves the output byte-for-byte.
+	mut handler := FileHandler{
+		root: cfg.output_dir
+	}
+	if watch {
+		live := &LiveReload{}
+		spawn watch_loop(opts, cfg, live)
+		handler = FileHandler{
+			root: cfg.output_dir
+			live: live
+		}
+		println('Watching for changes — saved edits rebuild and reload the page')
+	}
 	if open_browser {
 		open_url(url)
 	}
@@ -1598,11 +1611,192 @@ fn cmd_server(args []string) ! {
 		addr: addr
 		listener: listener
 		show_startup_message: false
-		handler: FileHandler{
-			root: public_dir
-		}
+		handler: handler
 	}
 	server.listen_and_serve()
+}
+
+// ServerOptions is what `verne server` read from the command line. The
+// watcher keeps it so every rebuild re-resolves the config through the same
+// path as the first build — editing verne.yaml is a source change like any
+// other.
+struct ServerOptions {
+	dir         string
+	config_file string
+	base_url    string
+	output_dir  string
+}
+
+// resolve_server_cfg loads the config for a `verne server` run and applies
+// the CLI overrides. `output_dir` comes back resolved, never empty, so the
+// caller does not have to re-derive the default.
+fn resolve_server_cfg(opts ServerOptions) !config.Config {
+	mut cfg := load_cfg(opts.dir, opts.config_file)!
+	if opts.base_url != '' {
+		config.validate_base_url(opts.base_url)!
+		cfg.base_url = opts.base_url
+	}
+	if opts.output_dir != '' {
+		cfg.output_dir = resolve_output_dir(opts.output_dir, cfg.root)
+	}
+	if cfg.output_dir == '' {
+		cfg.output_dir = os.join_path(cfg.root, 'public')
+	}
+	render.assert_output_under_root(cfg.output_dir, cfg.root)!
+	return cfg
+}
+
+// build_once renders the whole site and returns the page count.
+fn build_once(cfg config.Config) !int {
+	site := content.build_site(cfg)!
+	mut renderer := render.new(cfg, site)!
+	return renderer.build()!
+}
+
+// rebuild renders into a staging directory and swaps it in only once the
+// render succeeded. `render.new()` wipes its output before it renders, so
+// building straight into the served directory would leave a typo in a
+// template serving 404s until it is fixed.
+fn rebuild(cfg config.Config) !int {
+	staging := os.join_path(cfg.root, '.cache', 'rebuild')
+	previous := os.join_path(cfg.root, '.cache', 'previous')
+	mut staged := cfg
+	staged.output_dir = staging
+	count := build_once(staged)!
+	// Swap by renaming twice rather than deleting first: the served
+	// directory is only absent between the two renames, and if the second
+	// one fails the last good build goes straight back.
+	os.rmdir_all(previous) or {}
+	served := os.exists(cfg.output_dir)
+	if served {
+		// The staged build wiped the staging directory, not this one, so the
+		// guard render.new() normally applies has to be repeated here.
+		render.ensure_safe_to_wipe(cfg.output_dir, cfg.root)!
+		os.mv(cfg.output_dir, previous) or {
+			return error('cannot move ${cfg.output_dir} aside: ${err}')
+		}
+	}
+	os.mv(staging, cfg.output_dir) or {
+		if served {
+			os.mv(previous, cfg.output_dir) or {
+				return error('cannot install ${staging} (${err}), and the previous build is stranded in ${previous}')
+			}
+		}
+		return error('cannot move ${staging} to ${cfg.output_dir}: ${err}')
+	}
+	os.rmdir_all(previous) or {}
+	return count
+}
+
+// watch_loop rebuilds the site whenever a watched source file changes, then
+// bumps the reload generation so connected browsers refresh. A failed
+// rebuild is reported and the loop carries on: a typo in a template must
+// not take the dev server down.
+fn watch_loop(opts ServerOptions, initial config.Config, live &LiveReload) {
+	roots := watch_roots(initial)
+	mut last := tree_fingerprint(roots, initial.output_dir)
+	for {
+		time.sleep(watch_interval)
+		mut fp := tree_fingerprint(roots, initial.output_dir)
+		if fp == last {
+			continue
+		}
+		// A "save all" or a `git checkout` touches many files; wait for the
+		// tree to stop moving so a burst costs one rebuild, not one each.
+		for {
+			time.sleep(watch_debounce)
+			settled := tree_fingerprint(roots, initial.output_dir)
+			if settled == fp {
+				break
+			}
+			fp = settled
+		}
+		last = fp
+		t_start := time.now()
+		mut cfg := resolve_server_cfg(opts) or {
+			eprintln('verne: rebuild failed: ${err}')
+			continue
+		}
+		// Everything downstream — the listener, the fingerprint's skip path,
+		// the directory the handler reads — was bound to the output resolved
+		// at startup, so a rebuild may never retarget it.
+		cfg.output_dir = initial.output_dir
+		count := rebuild(cfg) or {
+			eprintln('verne: rebuild failed, still serving the last good build: ${err}')
+			continue
+		}
+		dur := time.now() - t_start
+		println('Rebuilt ${count} pages in ${dur.milliseconds()}ms')
+		live.bump()
+	}
+}
+
+// watch_roots lists what a build reads: the config file itself plus the
+// content, theme, and static trees under the project root.
+fn watch_roots(cfg config.Config) []string {
+	mut roots := []string{}
+	if cfg.source_path != '' {
+		roots << cfg.source_path
+	}
+	for name in ['content', 'themes', 'static'] {
+		roots << os.join_path(cfg.root, name)
+	}
+	return roots
+}
+
+// tree_fingerprint sums a (path, mtime, size) hash over every watched file.
+// Any difference means "something changed" — no timestamp comparison, so a
+// checkout that moves files backwards in time still triggers a rebuild.
+// mtime has one-second resolution, so two edits to the same file inside the
+// same second are only caught when the size changes.
+fn tree_fingerprint(roots []string, skip string) u64 {
+	mut sum := u64(0)
+	for root in roots {
+		sum += path_fingerprint(root, skip, 0)
+	}
+	return sum
+}
+
+fn path_fingerprint(path string, skip string, depth int) u64 {
+	if depth > watch_max_depth || path == skip {
+		return 0
+	}
+	if os.is_dir(path) {
+		// Themes may be symlinked (themes/_shared), so the walk follows
+		// links and the depth limit is what keeps a loop finite. A path we
+		// cannot read contributes nothing: a missing content/ or static/ is
+		// normal, and an unreadable one is the build's problem to report.
+		entries := os.ls(path) or { return 0 }
+		mut sum := u64(0)
+		for name in entries {
+			if name.starts_with('.') {
+				continue
+			}
+			sum += path_fingerprint(os.join_path(path, name), skip, depth + 1)
+		}
+		return sum
+	}
+	st := os.stat(path) or { return 0 }
+	// The path goes into the hash so a rename registers even when the
+	// content, and therefore mtime and size, carry over unchanged.
+	return fnv1a.sum64_string(path) ^ (u64(st.mtime) * 31 + st.size)
+}
+
+// LiveReload is the rebuild counter shared between the watcher thread and
+// the HTTP handlers. Browsers poll `/__verne/reload`; when the number they
+// get back differs from the one the page loaded with, they refresh.
+@[heap]
+struct LiveReload {
+mut:
+	generation u64
+}
+
+fn (lr &LiveReload) current() u64 {
+	return stdatomic.load_u64(&lr.generation)
+}
+
+fn (lr &LiveReload) bump() {
+	stdatomic.add_u64(&lr.generation, 1)
 }
 
 // open_url asks the OS to open `url` in the user's default browser.
@@ -1622,14 +1816,61 @@ fn open_url(url string) {
 	}
 }
 
+// The dev server watches by polling: V has no portable filesystem
+// notification API, and a stat() sweep over one site's sources is cheap
+// enough at this cadence.
+const watch_interval = 400 * time.millisecond
+
+// How long the tree must stay still before a rebuild starts.
+const watch_debounce = 150 * time.millisecond
+
+// Bounds the source walk. The walk follows symlinks (themes/_shared is
+// one), so this is what keeps a link loop finite.
+const watch_max_depth = 12
+
+// Where the browser asks for the current build generation. Prefixed with
+// `__verne` so it cannot collide with a page: no permalink starts with an
+// underscore.
+const reload_endpoint = '/__verne/reload'
+
+// The poller injected into every served page while watching. Kept free of
+// template literals — `${'$'}{...}` inside a V string is interpolation, not
+// JavaScript — and free of external assets, so nothing is added to the
+// built output.
+const livereload_snippet = '<script data-verne-livereload>\n(function () {\n  var loaded = null;\n  function poll() {\n    fetch("${reload_endpoint}", { cache: "no-store" })\n      .then(function (r) { return r.ok ? r.text() : null })\n      .then(function (id) {\n        if (id === null) return\n        if (loaded === null) loaded = id\n        else if (id !== loaded) { location.reload(); return }\n        setTimeout(poll, 500)\n      })\n      .catch(function () { setTimeout(poll, 1000) })\n  }\n  poll()\n})()\n</script>\n'
+
+// inject_livereload puts the poller just before </body>, or at the end of
+// the document when a page has no body tag.
+fn inject_livereload(html string) string {
+	if idx := html.to_lower().last_index('</body>') {
+		return html[..idx] + livereload_snippet + html[idx..]
+	}
+	return html + livereload_snippet
+}
+
 struct FileHandler {
 	root string
+	live &LiveReload = unsafe { nil }
 }
 
 fn (h FileHandler) handle(req http.Request) http.Response {
 	mut path := req.url
 	if pos := path.index('?') {
 		path = path[..pos]
+	}
+	if path == reload_endpoint {
+		if h.live == unsafe { nil } {
+			return http.new_response(
+				status: .not_found
+				body: '404 not found'
+				header: text_header()
+			)
+		}
+		return http.new_response(
+			status: .ok
+			body: h.live.current().str()
+			header: no_store_header()
+		)
 	}
 	decoded := urllib.query_unescape(path) or { path }
 	clean := decoded.trim_left('/')
@@ -1658,11 +1899,28 @@ fn (h FileHandler) handle(req http.Request) http.Response {
 			header: text_header()
 		)
 	}
+	if h.live != unsafe { nil } && os.file_ext(full) == '.html' {
+		// The page must not be cached, or a reload would replay the copy
+		// the browser already has instead of the one just rebuilt.
+		mut header := header_for(full)
+		header.add(.cache_control, 'no-store')
+		return http.new_response(
+			status: .ok
+			body: inject_livereload(body)
+			header: header
+		)
+	}
 	return http.new_response(
 		status: .ok
 		body: body
 		header: header_for(full)
 	)
+}
+
+fn no_store_header() http.Header {
+	mut h := text_header()
+	h.add(.cache_control, 'no-store')
+	return h
 }
 
 fn header_for(path string) http.Header {
