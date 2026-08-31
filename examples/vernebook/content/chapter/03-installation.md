@@ -24,7 +24,7 @@ mise run prod         # builds ./verne for your host
 
 ```bash
 ./verne version
-# → verne 0.1.0
+# → verne 0.3.0
 ```
 
 If the command prints a version, you're good. The next chapters drill into

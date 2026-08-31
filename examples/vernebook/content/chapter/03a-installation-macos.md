@@ -25,7 +25,7 @@ mise run prod
 ./verne version
 ```
 
-You should see `verne 0.1.0` (or whatever the current version is).
+You should see `verne 0.3.0` (or whatever the current version is).
 
 ## Smoke test
 
