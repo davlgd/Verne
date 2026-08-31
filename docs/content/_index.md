@@ -2,7 +2,7 @@
 title: "Verne"
 description: "Verne — a small, single-binary static site generator written in V, with a Tera-flavoured template DSL and a dual V/HTML shortcode model."
 hero:
-  kicker_meta: "v0.1.0 — initial release"
+  kicker_meta: "v0.3.0 — hot reload"
   title: 'A static site generator <em>written in V</em>'
   tagline: "Small, single-binary, opinionated."
   summary: "Verne builds Markdown into a static site — no Node toolchain, no framework runtime, one self-contained binary under 2 MB. A Tera-flavoured template DSL kept deliberately small, twenty-one display-only filters, a dual V/HTML shortcode system, and everything else (sitemap, RSS, asset fingerprinting) computed in one pass."

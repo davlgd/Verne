@@ -200,7 +200,7 @@ site.title                  string
 site.base_url               string
 site.language               string  (short form, e.g. "en")
 site.language_code          string  (full locale, e.g. "en-us")
-site.generator              string  ("Verne 0.1.0")
+site.generator              string  ("Verne 0.3.0")
 site.params                 map     (custom config params)
 site.posts                  []page  (posts only, sorted desc by date)
 site.pages                  []page  (all regular pages)

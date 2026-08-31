@@ -16,7 +16,7 @@ The current path while pre-built releases are not yet shipped:
 git clone https://github.com/davlgd/Verne
 cd Verne
 mise run prod        # or: v -prod -o verne src/
-./verne version      # → verne 0.1.0
+./verne version      # → verne 0.3.0
 ```
 
 The repository ships a [`mise`](https://mise.jdx.dev/) task file. If you do
@@ -68,7 +68,7 @@ binaries together.
 
 ```bash
 verne version
-# verne 0.1.0
+# verne 0.3.0
 ```
 
 If you see the version line, you are done. Move on to
