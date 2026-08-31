@@ -17,101 +17,102 @@ fn rfc3339_no_ms(t time.Time) string {
 // resolving fields like `site.title` or `site.posts` on access.
 pub fn (s &Site) as_template_object() template.Object {
 	captured := s
-	return template.Object{
-		name:   'site'
-		getter: fn [captured] (field string) ?template.Value {
-			match field {
-				'title' {
-					return template.Value(captured.cfg.title)
-				}
-				'base_url' {
-					return template.Value(captured.cfg.base_url)
-				}
-				'language' {
-					loc := captured.cfg.locale
-					short := if loc.contains('-') { loc.split('-')[0] } else { loc }
-					return template.Value(short)
-				}
-				'language_code' {
-					return template.Value(captured.cfg.locale)
-				}
-				'generator' {
-					return template.Value('${meta.name} ${meta.version}')
-				}
-				'posts' {
-					mut list := []template.Value{cap: captured.regular_pages.len}
-					mut posts := captured.regular_pages.filter(it.section == 'posts')
-					posts.sort_with_compare(fn (a &&Page, b &&Page) int {
-						au := a.date.unix()
-						bu := b.date.unix()
-						return if au > bu {
-							-1
-						} else if au < bu {
-							1
-						} else {
-							0
-						}
-					})
-					for p in posts {
-						list << template.Value(p.as_template_object())
+	getter := fn [captured] (field string) ?template.Value {
+		match field {
+			'title' {
+				return template.Value(captured.cfg.title)
+			}
+			'base_url' {
+				return template.Value(captured.cfg.base_url)
+			}
+			'language' {
+				loc := captured.cfg.locale
+				short := if loc.contains('-') { loc.split('-')[0] } else { loc }
+				return template.Value(short)
+			}
+			'language_code' {
+				return template.Value(captured.cfg.locale)
+			}
+			'generator' {
+				return template.Value('${meta.name} ${meta.version}')
+			}
+			'posts' {
+				mut list := []template.Value{cap: captured.regular_pages.len}
+				mut posts := captured.regular_pages.filter(it.section == 'posts')
+				posts.sort_with_compare(fn (a &&Page, b &&Page) int {
+					au := a.date.unix()
+					bu := b.date.unix()
+					return if au > bu {
+						-1
+					} else if au < bu {
+						1
+					} else {
+						0
 					}
-					return template.Value(list)
+				})
+				for p in posts {
+					list << template.Value(p.as_template_object())
 				}
-				'pages' {
-					mut list := []template.Value{cap: captured.regular_pages.len}
-					for p in captured.regular_pages {
-						list << template.Value(p.as_template_object())
-					}
-					return template.Value(list)
+				return template.Value(list)
+			}
+			'pages' {
+				mut list := []template.Value{cap: captured.regular_pages.len}
+				for p in captured.regular_pages {
+					list << template.Value(p.as_template_object())
 				}
-				'recent_posts' {
-					mut list := []template.Value{cap: captured.recent_posts.len}
-					for p in captured.recent_posts {
-						list << template.Value(p.as_template_object())
-					}
-					return template.Value(list)
+				return template.Value(list)
+			}
+			'recent_posts' {
+				mut list := []template.Value{cap: captured.recent_posts.len}
+				for p in captured.recent_posts {
+					list << template.Value(p.as_template_object())
 				}
-				'has_more_posts' {
-					return template.Value(captured.has_more_posts)
-				}
-				'popular_tags' {
-					return template.Value(tag_buckets_to_value(captured.popular_tags))
-				}
-				'popular_tags_overflow' {
-					return template.Value(i64(captured.popular_tags_overflow))
-				}
-				'tags_by_name' {
-					return template.Value(tag_buckets_to_value(captured.tags_by_name))
-				}
-				'stats' {
-					return template.Value(stats_to_object(captured.posts_stats))
-				}
-				'heatmap' {
-					return template.Value(heatmap_to_value(captured.heatmap_months))
-				}
-				'heatmap_years' {
-					return template.Value(heatmap_to_year_rows(captured.heatmap_months))
-				}
-				'footer_socials' {
-					return template.Value(socials_to_value(captured.footer_socials))
-				}
-				'projects' {
-					return template.Value(projects_to_value(captured.projects))
-				}
-				'projects_error' {
-					return template.Value(captured.projects_error)
-				}
-				'params' {
-					return template.Value(yaml_to_template_map(captured.cfg.params))
-				}
-				'summary' {
-					return template.Value(summary_to_value(captured.cfg.summary))
-				}
-				else {
-					return none
-				}
+				return template.Value(list)
+			}
+			'has_more_posts' {
+				return template.Value(captured.has_more_posts)
+			}
+			'popular_tags' {
+				return template.Value(tag_buckets_to_value(captured.popular_tags))
+			}
+			'popular_tags_overflow' {
+				return template.Value(i64(captured.popular_tags_overflow))
+			}
+			'tags_by_name' {
+				return template.Value(tag_buckets_to_value(captured.tags_by_name))
+			}
+			'stats' {
+				return template.Value(stats_to_object(captured.posts_stats))
+			}
+			'heatmap' {
+				return template.Value(heatmap_to_value(captured.heatmap_months))
+			}
+			'heatmap_years' {
+				return template.Value(heatmap_to_year_rows(captured.heatmap_months))
+			}
+			'footer_socials' {
+				return template.Value(socials_to_value(captured.footer_socials))
+			}
+			'projects' {
+				return template.Value(projects_to_value(captured.projects))
+			}
+			'projects_error' {
+				return template.Value(captured.projects_error)
+			}
+			'params' {
+				return template.Value(yaml_to_template_map(captured.cfg.params))
+			}
+			'summary' {
+				return template.Value(summary_to_value(captured.cfg.summary))
+			}
+			else {
+				return none
 			}
 		}
+	}
+	return template.Object{
+		name: 'site'
+		getter: getter
 	}
 }
 
@@ -133,158 +134,166 @@ fn summary_to_value(entries []config.SummaryEntry) []template.Value {
 // resolving fields like `page.title`, `page.body`, `page.summary` on access.
 pub fn (p &Page) as_template_object() template.Object {
 	captured := p
-	return template.Object{
-		name:   'page'
-		getter: fn [captured] (field string) ?template.Value {
-			match field {
-				'title' {
-					return template.Value(captured.title)
+	getter := fn [captured] (field string) ?template.Value {
+		match field {
+			'title' {
+				return template.Value(captured.title)
+			}
+			'display_title' {
+				return template.Value(page_display_title(captured))
+			}
+			'meta_description' {
+				return template.Value(page_meta_description(captured))
+			}
+			'og_image' {
+				return template.Value(page_og_image(captured))
+			}
+			'og_type' {
+				return template.Value(page_og_type(captured))
+			}
+			'jsonld' {
+				return template.Value(template.SafeString{
+					value: captured.jsonld_html
+				})
+			}
+			'breadcrumb_path' {
+				return template.Value(page_breadcrumb_path(captured))
+			}
+			'layout' {
+				return template.Value(captured.layout)
+			}
+			'has_rss' {
+				return template.Value(page_has_rss(captured))
+			}
+			'rss_url' {
+				return template.Value(page_rss_url(captured))
+			}
+			'term' {
+				if v := captured.params['term'] {
+					return template.Value(v.str_or(''))
 				}
-				'display_title' {
-					return template.Value(page_display_title(captured))
-				}
-				'meta_description' {
-					return template.Value(page_meta_description(captured))
-				}
-				'og_image' {
-					return template.Value(page_og_image(captured))
-				}
-				'og_type' {
-					return template.Value(page_og_type(captured))
-				}
-				'jsonld' {
-					return template.Value(template.SafeString{
-						value: captured.jsonld_html
-					})
-				}
-				'breadcrumb_path' {
-					return template.Value(page_breadcrumb_path(captured))
-				}
-				'layout' {
-					return template.Value(captured.layout)
-				}
-				'has_rss' {
-					return template.Value(page_has_rss(captured))
-				}
-				'rss_url' {
-					return template.Value(page_rss_url(captured))
-				}
-				'term' {
-					if v := captured.params['term'] {
-						return template.Value(v.str_or(''))
-					}
+				return template.Value('')
+			}
+			'description' {
+				return template.Value(captured.description)
+			}
+			'section' {
+				return template.Value(captured.section)
+			}
+			'permalink' {
+				return template.Value(captured.permalink)
+			}
+			'relpermalink' {
+				return template.Value(captured.rel_permalink)
+			}
+			'edit_url' {
+				return template.Value(captured.edit_url)
+			}
+			'chapter_no' {
+				return template.Value(captured.chapter_no)
+			}
+			'is_home' {
+				return template.Value(captured.is_home)
+			}
+			'is_section' {
+				return template.Value(captured.is_section)
+			}
+			'is_page' {
+				return template.Value(!captured.is_section && !captured.is_home)
+			}
+			'word_count' {
+				return template.Value(i64(captured.word_count))
+			}
+			'reading_time' {
+				return template.Value(i64(captured.reading_time))
+			}
+			'plain' {
+				return template.Value(captured.plain)
+			}
+			'content' {
+				return template.Value(template.SafeString{
+					value: captured.body_html
+				})
+			}
+			'toc' {
+				if captured.toc.len == 0 {
 					return template.Value('')
 				}
-				'description' {
-					return template.Value(captured.description)
+				return template.Value(template.SafeString{
+					value: captured.toc
+				})
+			}
+			'tags' {
+				mut list := []template.Value{cap: captured.tags.len}
+				for t in captured.tags {
+					list << template.Value(t)
 				}
-				'section' {
-					return template.Value(captured.section)
+				return template.Value(list)
+			}
+			'pages' {
+				mut list := []template.Value{cap: captured.pages_in.len}
+				for inner in captured.pages_in {
+					list << template.Value(inner.as_template_object())
 				}
-				'permalink' {
-					return template.Value(captured.permalink)
+				return template.Value(list)
+			}
+			'date' {
+				return template.Value(template.DateValue{
+					t: captured.date
+				})
+			}
+			'lastmod' {
+				return template.Value(template.DateValue{
+					t: captured.last_mod
+				})
+			}
+			'file' {
+				return template.Value(file_to_template_object(captured))
+			}
+			'params' {
+				return template.Value(yaml_to_template_map(captured.params))
+			}
+			'prev_in_section' {
+				if isnil(captured.prev_in_section) {
+					return template.none_value
 				}
-				'relpermalink' {
-					return template.Value(captured.rel_permalink)
+				return template.Value(captured.prev_in_section.as_template_object())
+			}
+			'next_in_section' {
+				if isnil(captured.next_in_section) {
+					return template.none_value
 				}
-				'edit_url' {
-					return template.Value(captured.edit_url)
-				}
-				'chapter_no' {
-					return template.Value(captured.chapter_no)
-				}
-				'is_home' {
-					return template.Value(captured.is_home)
-				}
-				'is_section' {
-					return template.Value(captured.is_section)
-				}
-				'is_page' {
-					return template.Value(!captured.is_section && !captured.is_home)
-				}
-				'word_count' {
-					return template.Value(i64(captured.word_count))
-				}
-				'reading_time' {
-					return template.Value(i64(captured.reading_time))
-				}
-				'plain' {
-					return template.Value(captured.plain)
-				}
-				'content' {
-					return template.Value(template.SafeString{
-						value: captured.body_html
-					})
-				}
-				'toc' {
-					if captured.toc.len == 0 {
-						return template.Value('')
-					}
-					return template.Value(template.SafeString{
-						value: captured.toc
-					})
-				}
-				'tags' {
-					mut list := []template.Value{cap: captured.tags.len}
-					for t in captured.tags {
-						list << template.Value(t)
-					}
-					return template.Value(list)
-				}
-				'pages' {
-					mut list := []template.Value{cap: captured.pages_in.len}
-					for inner in captured.pages_in {
-						list << template.Value(inner.as_template_object())
-					}
-					return template.Value(list)
-				}
-				'date' {
-					return template.Value(template.DateValue{
-						t: captured.date
-					})
-				}
-				'lastmod' {
-					return template.Value(template.DateValue{
-						t: captured.last_mod
-					})
-				}
-				'file' {
-					return template.Value(file_to_template_object(captured))
-				}
-				'params' {
-					return template.Value(yaml_to_template_map(captured.params))
-				}
-				'prev_in_section' {
-					if isnil(captured.prev_in_section) {
-						return template.none_value
-					}
-					return template.Value(captured.prev_in_section.as_template_object())
-				}
-				'next_in_section' {
-					if isnil(captured.next_in_section) {
-						return template.none_value
-					}
-					return template.Value(captured.next_in_section.as_template_object())
-				}
-				else {
-					return none
-				}
+				return template.Value(captured.next_in_section.as_template_object())
+			}
+			else {
+				return none
 			}
 		}
+	}
+	return template.Object{
+		name: 'page'
+		getter: getter
 	}
 }
 
 fn file_to_template_object(p &Page) template.Object {
 	captured := p
-	return template.Object{
-		name:   'file'
-		getter: fn [captured] (field string) ?template.Value {
-			match field {
-				'basename' { return template.Value(captured.base_filename) }
-				'path' { return template.Value(captured.rel_url) }
-				else { return none }
+	getter := fn [captured] (field string) ?template.Value {
+		match field {
+			'basename' {
+				return template.Value(captured.base_filename)
+			}
+			'path' {
+				return template.Value(captured.rel_url)
+			}
+			else {
+				return none
 			}
 		}
+	}
+	return template.Object{
+		name: 'file'
+		getter: getter
 	}
 }
 
@@ -301,41 +310,42 @@ fn tag_buckets_to_value(buckets []TagBucket) []template.Value {
 
 fn stats_to_object(s PostsStats) template.Object {
 	captured := s
-	return template.Object{
-		name:   'stats'
-		getter: fn [captured] (field string) ?template.Value {
-			match field {
-				'total_posts' {
-					return template.Value(i64(captured.total_posts))
-				}
-				'total_words' {
-					return template.Value(i64(captured.total_words))
-				}
-				'avg_words' {
-					return template.Value(i64(captured.avg_words))
-				}
-				'total_read' {
-					return template.Value(i64(captured.total_read))
-				}
-				'avg_read' {
-					return template.Value(i64(captured.avg_read))
-				}
-				'since_year' {
-					return template.Value(i64(captured.since_year))
-				}
-				'uptime_years' {
-					return template.Value(i64(captured.uptime_years))
-				}
-				'last_post_date' {
-					return template.Value(template.DateValue{
-						t: captured.last_post_date
-					})
-				}
-				else {
-					return none
-				}
+	getter := fn [captured] (field string) ?template.Value {
+		match field {
+			'total_posts' {
+				return template.Value(i64(captured.total_posts))
+			}
+			'total_words' {
+				return template.Value(i64(captured.total_words))
+			}
+			'avg_words' {
+				return template.Value(i64(captured.avg_words))
+			}
+			'total_read' {
+				return template.Value(i64(captured.total_read))
+			}
+			'avg_read' {
+				return template.Value(i64(captured.avg_read))
+			}
+			'since_year' {
+				return template.Value(i64(captured.since_year))
+			}
+			'uptime_years' {
+				return template.Value(i64(captured.uptime_years))
+			}
+			'last_post_date' {
+				return template.Value(template.DateValue{
+					t: captured.last_post_date
+				})
+			}
+			else {
+				return none
 			}
 		}
+	}
+	return template.Object{
+		name: 'stats'
+		getter: getter
 	}
 }
 
@@ -416,9 +426,9 @@ fn heatmap_to_year_rows(cells []HeatmapCell) []template.Value {
 				key := '${y:04d}-${m:02d}'
 				c := by_key[key] or {
 					HeatmapCell{
-						year:      y
-						month:     m
-						count:     0
+						year: y
+						month: m
+						count: 0
 						intensity: 0.0
 					}
 				}
@@ -485,7 +495,9 @@ pub fn yaml_to_template_value(v yaml.Value) template.Value {
 		}
 		f64 {
 			template.Value(i64(v))
-		} // engine has no float; coerce
+		}
+
+		// engine has no float; coerce
 		[]yaml.Value {
 			mut list := []template.Value{cap: v.len}
 			for el in v {

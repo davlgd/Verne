@@ -39,7 +39,7 @@ pub fn new(asset_root string, output_dir string, base_url string) &Pipeline {
 	return &Pipeline{
 		asset_root: asset_root
 		output_dir: output_dir
-		base_url:   base_url
+		base_url: base_url
 	}
 }
 
@@ -52,7 +52,7 @@ pub fn (mut p Pipeline) get(rel string) !&Resource {
 	}
 	bytes := os.read_file(full)!.bytes()
 	return &Resource{
-		rel:   clean
+		rel: clean
 		bytes: bytes
 	}
 }
@@ -65,7 +65,7 @@ pub fn (mut p Pipeline) concat(target_rel string, parts []&Resource) !&Resource 
 		buf << r.bytes
 	}
 	return &Resource{
-		rel:   target_rel.trim_left('/')
+		rel: target_rel.trim_left('/')
 		bytes: buf
 	}
 }
@@ -87,8 +87,8 @@ pub fn (mut p Pipeline) fingerprint(r &Resource) !&Resource {
 	new_rel := if dir == '.' || dir == '' { new_base } else { dir + '/' + new_base }
 	integrity := 'sha256-' + base64.encode(hash[..])
 	return &Resource{
-		rel:       new_rel
-		bytes:     r.bytes
+		rel: new_rel
+		bytes: r.bytes
 		integrity: integrity
 	}
 }

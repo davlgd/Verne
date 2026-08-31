@@ -66,22 +66,22 @@ pub fn verify() VerifyResult {
 	out, code := exec_argv(path, ['--version'], '') or {
 		return VerifyResult{
 			found: true
-			path:  path
-			err:   err.msg()
+			path: path
+			err: err.msg()
 		}
 	}
 	if code != 0 {
 		return VerifyResult{
 			found: true
-			path:  path
-			err:   out.trim_space()
+			path: path
+			err: out.trim_space()
 		}
 	}
 	return VerifyResult{
-		found:    true
-		path:     path
+		found: true
+		path: path
 		runnable: true
-		version:  out.trim_space()
+		version: out.trim_space()
 	}
 }
 
@@ -166,8 +166,7 @@ fn valid_lang(lang string) bool {
 		return false
 	}
 	for c in lang {
-		if !((c >= `a` && c <= `z`) || (c >= `A` && c <= `Z`)
-			|| (c >= `0` && c <= `9`) || c == `_` || c == `-` || c == `+`) {
+		if !((c >= `a` && c <= `z`) || (c >= `A` && c <= `Z`) || (c >= `0` && c <= `9`) || c == `_` || c == `-` || c == `+`) {
 			return false
 		}
 	}

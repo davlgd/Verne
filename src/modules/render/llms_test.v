@@ -15,9 +15,9 @@ struct StringCase {
 
 fn test_page_md_includes_title_description_and_body() {
 	p := &content.Page{
-		title:       'Quick start'
+		title: 'Quick start'
 		description: 'Your first Verne site in 60 seconds.'
-		body_md:     'Install the binary.\n\nDrop a Markdown file in `content/`.\n'
+		body_md: 'Install the binary.\n\nDrop a Markdown file in `content/`.\n'
 	}
 	got := page_md(p)
 	expected := '# Quick start\n\n_Your first Verne site in 60 seconds._\n\nInstall the binary.\n\nDrop a Markdown file in `content/`.\n'
@@ -27,27 +27,27 @@ fn test_page_md_includes_title_description_and_body() {
 fn test_page_md_omits_missing_fields() {
 	cases := [
 		PageMdCase{
-			page:     content.Page{
-				title:   'Body only'
+			page: content.Page{
+				title: 'Body only'
 				body_md: 'hello'
 			}
 			expected: '# Body only\n\nhello\n'
 		},
 		PageMdCase{
-			page:     content.Page{
+			page: content.Page{
 				title: 'Title only'
 			}
 			expected: '# Title only\n'
 		},
 		PageMdCase{
-			page:     content.Page{
+			page: content.Page{
 				description: 'desc only'
-				body_md:     'hi'
+				body_md: 'hi'
 			}
 			expected: '_desc only_\n\nhi\n'
 		},
 		PageMdCase{
-			page:     content.Page{}
+			page: content.Page{}
 			expected: ''
 		},
 	]
@@ -62,11 +62,11 @@ fn test_page_md_omits_missing_fields() {
 fn test_build_llms_full_separates_pages_with_hr() {
 	pages := [
 		&content.Page{
-			title:   'A'
+			title: 'A'
 			body_md: 'first'
 		},
 		&content.Page{
-			title:   'B'
+			title: 'B'
 			body_md: 'second'
 		},
 	]
@@ -78,12 +78,12 @@ fn test_build_llms_full_separates_pages_with_hr() {
 fn test_build_llms_full_skips_empty_pages() {
 	pages := [
 		&content.Page{
-			title:   'A'
+			title: 'A'
 			body_md: 'first'
 		},
 		&content.Page{},
 		&content.Page{
-			title:   'C'
+			title: 'C'
 			body_md: 'third'
 		},
 	]
@@ -98,7 +98,7 @@ fn test_llms_included_pages_drops_excluded() {
 			title: 'kept'
 		},
 		&content.Page{
-			title:         'gone'
+			title: 'gone'
 			llms_excluded: true
 		},
 		&content.Page{
@@ -114,19 +114,19 @@ fn test_llms_included_pages_drops_excluded() {
 fn test_humanise_section_key_titlecases_and_separates() {
 	cases := [
 		StringCase{
-			input:    'guides'
+			input: 'guides'
 			expected: 'Guides'
 		},
 		StringCase{
-			input:    'release-notes'
+			input: 'release-notes'
 			expected: 'Release Notes'
 		},
 		StringCase{
-			input:    'guides/sub'
+			input: 'guides/sub'
 			expected: 'Guides Sub'
 		},
 		StringCase{
-			input:    'a_b_c'
+			input: 'a_b_c'
 			expected: 'A B C'
 		},
 	]
@@ -138,7 +138,7 @@ fn test_humanise_section_key_titlecases_and_separates() {
 fn test_llms_section_title_prefers_index_page_title() {
 	bucket := [
 		&content.Page{
-			title:      'The Guides'
+			title: 'The Guides'
 			is_section: true
 		},
 		&content.Page{
@@ -163,16 +163,16 @@ fn test_llms_section_title_empty_key_is_home() {
 
 fn test_bullet_for_links_to_html_md_twin() {
 	p := &content.Page{
-		title:       'Quick start'
+		title: 'Quick start'
 		description: 'Your first site.'
-		permalink:   'https://example.com/quick-start/'
+		permalink: 'https://example.com/quick-start/'
 	}
 	assert bullet_for(p) == '- [Quick start](https://example.com/quick-start/index.html.md): Your first site.'
 }
 
 fn test_bullet_for_falls_back_to_relpermalink() {
 	p := &content.Page{
-		title:         'Quick start'
+		title: 'Quick start'
 		rel_permalink: '/quick-start/'
 	}
 	assert bullet_for(p) == '- [Quick start](/quick-start/index.html.md)'
@@ -187,19 +187,19 @@ fn test_md_url_for_handles_missing_trailing_slash() {
 
 fn test_canonical_page_order_places_home_then_alpha_sections() {
 	home := &content.Page{
-		title:   'Home'
+		title: 'Home'
 		is_home: true
 	}
 	guides_a := &content.Page{
-		title:   'A guide'
+		title: 'A guide'
 		section: 'guides'
 	}
 	guides_b := &content.Page{
-		title:   'B guide'
+		title: 'B guide'
 		section: 'guides'
 	}
 	ref := &content.Page{
-		title:   'Ref'
+		title: 'Ref'
 		section: 'reference'
 	}
 	ordered := canonical_page_order([guides_b, ref, home, guides_a], true)
@@ -215,7 +215,7 @@ fn test_canonical_page_order_can_skip_home() {
 		is_home: true
 	}
 	other := &content.Page{
-		title:   'X'
+		title: 'X'
 		section: 'guides'
 	}
 	ordered := canonical_page_order([home, other], false)
@@ -228,12 +228,12 @@ fn test_canonical_page_order_puts_optional_last() {
 		is_home: true
 	}
 	guide := &content.Page{
-		title:   'Guide'
+		title: 'Guide'
 		section: 'guides'
 	}
 	opt := &content.Page{
-		title:         'Changelog'
-		section:       'meta'
+		title: 'Changelog'
+		section: 'meta'
 		llms_optional: true
 	}
 	ordered := canonical_page_order([opt, guide, home], true)
@@ -255,21 +255,21 @@ fn test_build_llms_txt_emits_blockquote_when_description_set() {
 
 fn test_build_llms_txt_groups_by_section_alphabetically() {
 	guides := &content.Page{
-		title:      'Guides'
-		section:    'guides'
+		title: 'Guides'
+		section: 'guides'
 		is_section: true
-		permalink:  'https://example.com/guides/'
+		permalink: 'https://example.com/guides/'
 	}
 	deploying := &content.Page{
-		title:     'Deploying'
-		section:   'guides'
+		title: 'Deploying'
+		section: 'guides'
 		permalink: 'https://example.com/guides/deploying/'
 	}
 	ref := &content.Page{
-		title:      'Reference'
-		section:    'reference'
+		title: 'Reference'
+		section: 'reference'
 		is_section: true
-		permalink:  'https://example.com/reference/'
+		permalink: 'https://example.com/reference/'
 	}
 	got := build_llms_txt('Verne', 'A small SSG.', [deploying, ref, guides])
 	expected := '# Verne\n\n> A small SSG.\n\n## Guides\n\n- [Guides](https://example.com/guides/index.html.md)\n- [Deploying](https://example.com/guides/deploying/index.html.md)\n\n## Reference\n\n- [Reference](https://example.com/reference/index.html.md)\n'
@@ -278,14 +278,14 @@ fn test_build_llms_txt_groups_by_section_alphabetically() {
 
 fn test_build_llms_txt_emits_optional_section_last() {
 	guide := &content.Page{
-		title:     'Guide'
-		section:   'guides'
+		title: 'Guide'
+		section: 'guides'
 		permalink: 'https://example.com/guides/g/'
 	}
 	opt := &content.Page{
-		title:         'Changelog'
-		section:       'meta'
-		permalink:     'https://example.com/changelog/'
+		title: 'Changelog'
+		section: 'meta'
+		permalink: 'https://example.com/changelog/'
 		llms_optional: true
 	}
 	got := build_llms_txt('Verne', '', [opt, guide])
@@ -295,8 +295,8 @@ fn test_build_llms_txt_emits_optional_section_last() {
 
 fn test_build_llms_txt_skips_home_from_groups() {
 	home := &content.Page{
-		title:     'Verne'
-		is_home:   true
+		title: 'Verne'
+		is_home: true
 		permalink: 'https://example.com/'
 	}
 	got := build_llms_txt('Verne', 'A small SSG.', [home])
@@ -307,14 +307,14 @@ fn test_build_llms_txt_skips_home_from_groups() {
 fn test_sort_section_pages_puts_index_first_then_date_desc() {
 	older := &content.Page{
 		title: 'Older'
-		date:  time.parse_iso8601('2024-01-01T00:00:00Z') or { time.Time{} }
+		date: time.parse_iso8601('2024-01-01T00:00:00Z') or { time.Time{} }
 	}
 	newer := &content.Page{
 		title: 'Newer'
-		date:  time.parse_iso8601('2025-06-01T00:00:00Z') or { time.Time{} }
+		date: time.parse_iso8601('2025-06-01T00:00:00Z') or { time.Time{} }
 	}
 	section := &content.Page{
-		title:      'Section'
+		title: 'Section'
 		is_section: true
 	}
 	bucket := [older, newer, section]

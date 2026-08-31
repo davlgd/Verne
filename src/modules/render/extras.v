@@ -126,8 +126,7 @@ fn (mut r Renderer) write_robots() ! {
 
 fn (mut r Renderer) write_rss_all() ! {
 	site_title := r.cfg.title
-	r.write_one_rss(r.site.regular_pages, false, site_title, 'Recent content on ' + site_title, os.join_path(r.output_dir,
-		'index.xml'), r.cfg.base_url, r.cfg.base_url + 'index.xml')!
+	r.write_one_rss(r.site.regular_pages, false, site_title, 'Recent content on ' + site_title, os.join_path(r.output_dir, 'index.xml'), r.cfg.base_url, r.cfg.base_url + 'index.xml')!
 	mut posts := []&content.Page{}
 	for p in r.site.regular_pages {
 		if p.section == 'posts' {
@@ -138,8 +137,7 @@ fn (mut r Renderer) write_rss_all() ! {
 		section_dir := os.join_path(r.output_dir, 'posts')
 		os.mkdir_all(section_dir)!
 		section_title := 'Posts on ' + site_title
-		r.write_one_rss(posts, false, section_title, 'Recent content in ' + section_title, os.join_path(section_dir,
-			'index.xml'), r.cfg.base_url + 'posts/', r.cfg.base_url + 'posts/index.xml')!
+		r.write_one_rss(posts, false, section_title, 'Recent content in ' + section_title, os.join_path(section_dir, 'index.xml'), r.cfg.base_url + 'posts/', r.cfg.base_url + 'posts/index.xml')!
 	}
 	r.write_taxonomy_rss()!
 }
@@ -162,8 +160,7 @@ fn (mut r Renderer) write_taxonomy_rss() ! {
 		title_term := term_title(term) + ' on ' + r.cfg.title
 		feed_url := r.cfg.base_url + 'tags/' + slug + '/index.xml'
 		link := r.cfg.base_url + 'tags/' + slug + '/'
-		r.write_one_rss(term_pages, false, title_term, 'Recent content in ' + title_term, os.join_path(term_dir,
-			'index.xml'), link, feed_url)!
+		r.write_one_rss(term_pages, false, title_term, 'Recent content in ' + title_term, os.join_path(term_dir, 'index.xml'), link, feed_url)!
 	}
 
 	mut tag_pages := []&content.Page{}
@@ -193,8 +190,7 @@ fn (mut r Renderer) write_taxonomy_rss() ! {
 		}
 	})
 	tags_title := 'Tags on ' + r.cfg.title
-	r.write_one_rss(tag_pages, true, tags_title, 'Recent content in ' + tags_title, os.join_path(tags_dir,
-		'index.xml'), r.cfg.base_url + 'tags/', r.cfg.base_url + 'tags/index.xml')!
+	r.write_one_rss(tag_pages, true, tags_title, 'Recent content in ' + tags_title, os.join_path(tags_dir, 'index.xml'), r.cfg.base_url + 'tags/', r.cfg.base_url + 'tags/index.xml')!
 }
 
 fn (mut r Renderer) write_one_rss(pages []&content.Page, suppress_desc bool, channel_title string, channel_desc string, out_path string, link string, feed_url string) ! {
@@ -355,12 +351,12 @@ fn (mut r Renderer) write_taxonomy_pages(site_obj template.Object) ! {
 
 fn (r &Renderer) synth_page(section string, name string) &content.Page {
 	return &content.Page{
-		title:         section
-		section:       section
+		title: section
+		section: section
 		base_filename: name
-		is_section:    true
+		is_section: true
 		rel_permalink: '/' + section + '/'
-		permalink:     r.cfg.base_url.trim_right('/') + '/' + section + '/'
+		permalink: r.cfg.base_url.trim_right('/') + '/' + section + '/'
 	}
 }
 
@@ -369,13 +365,13 @@ fn (r &Renderer) synth_term_page(term string, pages []&content.Page) &content.Pa
 	mut params := map[string]yaml.Value{}
 	params['term'] = yaml.Value(term)
 	return &content.Page{
-		title:         term_title(term)
-		section:       'tags'
+		title: term_title(term)
+		section: 'tags'
 		base_filename: slug
-		is_section:    true
+		is_section: true
 		rel_permalink: '/tags/' + slug + '/'
-		permalink:     r.cfg.base_url.trim_right('/') + '/tags/' + slug + '/'
-		pages_in:      pages.clone()
-		params:        params
+		permalink: r.cfg.base_url.trim_right('/') + '/tags/' + slug + '/'
+		pages_in: pages.clone()
+		params: params
 	}
 }

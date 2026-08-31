@@ -24,37 +24,37 @@ fn test_link_section_neighbors_honours_summary() {
 	// ordering, while `summary` declares the opposite. The summary order
 	// must win.
 	a := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'a'
 		rel_permalink: '/chapter/a/'
-		date:          time.unix(3000)
+		date: time.unix(3000)
 	}
 	b := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'b'
 		rel_permalink: '/chapter/b/'
-		date:          time.unix(2000)
+		date: time.unix(2000)
 	}
 	c := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'c'
 		rel_permalink: '/chapter/c/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	mut site := &Site{
 		cfg: config.Config{
 			summary: [
 				config.SummaryEntry{
 					title: 'First'
-					url:   '/chapter/a/'
+					url: '/chapter/a/'
 				},
 				config.SummaryEntry{
 					title: 'Second'
-					url:   '/chapter/b/'
+					url: '/chapter/b/'
 				},
 				config.SummaryEntry{
 					title: 'Third'
-					url:   '/chapter/c/'
+					url: '/chapter/c/'
 				},
 			]
 		}
@@ -75,63 +75,63 @@ fn test_link_section_neighbors_honours_summary() {
 fn test_link_section_neighbors_honours_nested_summary_depth_first() {
 	// Summary: A, [B with children B1, B2], C — flattened DFS = A, B, B1, B2, C.
 	a := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'a'
 		rel_permalink: '/chapter/a/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	b := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'b'
 		rel_permalink: '/chapter/b/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	b1 := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'b1'
 		rel_permalink: '/chapter/b1/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	b2 := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'b2'
 		rel_permalink: '/chapter/b2/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	c := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'c'
 		rel_permalink: '/chapter/c/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	mut site := &Site{
 		cfg: config.Config{
 			summary: [
 				config.SummaryEntry{
-					title:     'Header'
+					title: 'Header'
 					is_header: true
 				},
 				config.SummaryEntry{
 					title: 'A'
-					url:   '/chapter/a/'
+					url: '/chapter/a/'
 				},
 				config.SummaryEntry{
-					title:    'B'
-					url:      '/chapter/b/'
+					title: 'B'
+					url: '/chapter/b/'
 					children: [
 						config.SummaryEntry{
 							title: 'B1'
-							url:   '/chapter/b1/'
+							url: '/chapter/b1/'
 						},
 						config.SummaryEntry{
 							title: 'B2'
-							url:   '/chapter/b2/'
+							url: '/chapter/b2/'
 						},
 					]
 				},
 				config.SummaryEntry{
 					title: 'C'
-					url:   '/chapter/c/'
+					url: '/chapter/c/'
 				},
 			]
 		}
@@ -139,12 +139,9 @@ fn test_link_section_neighbors_honours_nested_summary_depth_first() {
 	site.sections['chapter'] = [c, b1, a, b2, b] // intentionally scrambled
 	site.link_section_neighbors()
 	assert isnil(a.prev_in_section) && a.next_in_section.rel_permalink == '/chapter/b/'
-	assert b.prev_in_section.rel_permalink == '/chapter/a/'
-		&& b.next_in_section.rel_permalink == '/chapter/b1/'
-	assert b1.prev_in_section.rel_permalink == '/chapter/b/'
-		&& b1.next_in_section.rel_permalink == '/chapter/b2/'
-	assert b2.prev_in_section.rel_permalink == '/chapter/b1/'
-		&& b2.next_in_section.rel_permalink == '/chapter/c/'
+	assert b.prev_in_section.rel_permalink == '/chapter/a/' && b.next_in_section.rel_permalink == '/chapter/b1/'
+	assert b1.prev_in_section.rel_permalink == '/chapter/b/' && b1.next_in_section.rel_permalink == '/chapter/b2/'
+	assert b2.prev_in_section.rel_permalink == '/chapter/b1/' && b2.next_in_section.rel_permalink == '/chapter/c/'
 	assert c.prev_in_section.rel_permalink == '/chapter/b2/' && isnil(c.next_in_section)
 }
 
@@ -180,9 +177,9 @@ fn test_recent_posts_caps_at_default_and_flags_overflow() {
 	mut posts := []&Page{}
 	for i in 0 .. 7 {
 		posts << &Page{
-			section:       'posts'
+			section: 'posts'
 			rel_permalink: '/posts/p${i}/'
-			date:          time.unix(1000 + i64(i) * 100)
+			date: time.unix(1000 + i64(i) * 100)
 		}
 	}
 	mut site := &Site{}
@@ -198,9 +195,9 @@ fn test_recent_posts_no_overflow_when_under_limit() {
 	mut posts := []&Page{}
 	for i in 0 .. 3 {
 		posts << &Page{
-			section:       'posts'
+			section: 'posts'
 			rel_permalink: '/posts/p${i}/'
-			date:          time.unix(1000 + i64(i) * 100)
+			date: time.unix(1000 + i64(i) * 100)
 		}
 	}
 	mut site := &Site{}
@@ -213,9 +210,9 @@ fn test_recent_posts_honours_param_override() {
 	mut posts := []&Page{}
 	for i in 0 .. 10 {
 		posts << &Page{
-			section:       'posts'
+			section: 'posts'
 			rel_permalink: '/posts/p${i}/'
-			date:          time.unix(1000 + i64(i) * 100)
+			date: time.unix(1000 + i64(i) * 100)
 		}
 	}
 	mut site := &Site{
@@ -234,22 +231,22 @@ fn test_recent_posts_honours_param_override() {
 fn test_link_section_neighbors_falls_back_to_date_when_summary_empty() {
 	// No summary → ascending date order: c (1000), b (2000), a (3000).
 	a := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'a'
 		rel_permalink: '/chapter/a/'
-		date:          time.unix(3000)
+		date: time.unix(3000)
 	}
 	b := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'b'
 		rel_permalink: '/chapter/b/'
-		date:          time.unix(2000)
+		date: time.unix(2000)
 	}
 	c := &Page{
-		section:       'chapter'
+		section: 'chapter'
 		base_filename: 'c'
 		rel_permalink: '/chapter/c/'
-		date:          time.unix(1000)
+		date: time.unix(1000)
 	}
 	mut site := &Site{}
 	site.sections['chapter'] = [a, b, c]

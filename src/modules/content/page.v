@@ -50,10 +50,10 @@ pub fn load_page(root string, abs_path string, section string, frontmatter_date_
 	raw := os.read_file(abs_path)!
 	doc := frontmatter.parse(raw) or { return error('${abs_path}: ${err}') }
 	mut p := &Page{
-		section:     section
+		section: section
 		source_path: abs_path
-		body_md:     doc.body
-		params:      doc.meta.clone()
+		body_md: doc.body
+		params: doc.meta.clone()
 	}
 	rel := abs_path.trim_string_left(root).trim_left('/').trim_string_left('content/')
 	base := os.file_name(abs_path)

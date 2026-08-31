@@ -16,7 +16,7 @@ pub:
 // the body and `meta` is empty.
 pub fn parse(src string) !Document {
 	mut s := src
-	if s.starts_with('\xEF\xBB\xBF') {
+	if s.starts_with('﻿') {
 		s = s[3..]
 	}
 	if !s.starts_with('---') {
@@ -57,8 +57,7 @@ fn find_closing(s string, from int) ?Closing {
 	mut i := from
 	for i < s.len {
 		// must be at start of line
-		if (i == 0 || s[i - 1] == `\n`) && i + 3 <= s.len && s[i] == `-` && s[i + 1] == `-`
-			&& s[i + 2] == `-` {
+		if (i == 0 || s[i - 1] == `\n`) && i + 3 <= s.len && s[i] == `-` && s[i + 1] == `-` && s[i + 2] == `-` {
 			j := i + 3
 			if j == s.len {
 				return Closing{i, j}

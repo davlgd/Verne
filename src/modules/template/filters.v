@@ -100,8 +100,7 @@ fn fn_urlencode(v Value, _ []Value) !Value {
 	s := to_string(v)
 	mut b := strings.new_builder(s.len)
 	for c in s {
-		if (c >= `a` && c <= `z`) || (c >= `A` && c <= `Z`) || (c >= `0` && c <= `9`)
-			|| c == `-` || c == `_` || c == `.` || c == `~` {
+		if (c >= `a` && c <= `z`) || (c >= `A` && c <= `Z`) || (c >= `0` && c <= `9`) || c == `-` || c == `_` || c == `.` || c == `~` {
 			b.write_u8(c)
 		} else {
 			b.write_string('%${c:02X}')
@@ -150,7 +149,9 @@ fn fn_format_date(v Value, args []Value) !Value {
 	layout := to_string(args[0])
 	t := match v {
 		DateValue { v.t }
-		else { return error('format_date: expected date, got ${type_name(v)}') }
+		else {
+			return error('format_date: expected date, got ${type_name(v)}')
+		}
 	}
 
 	return Value(format_go(t, layout))
@@ -211,8 +212,7 @@ fn printf_format(fmt string, args []Value) string {
 		mut spec_end := i + 1
 		for spec_end < fmt.len {
 			cc := fmt[spec_end]
-			if (cc >= `0` && cc <= `9`) || cc == `-` || cc == `+` || cc == ` `
-				|| cc == `0` || cc == `.` || cc == `#` {
+			if (cc >= `0` && cc <= `9`) || cc == `-` || cc == `+` || cc == ` ` || cc == `0` || cc == `.` || cc == `#` {
 				spec_end++
 				continue
 			}

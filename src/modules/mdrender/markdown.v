@@ -224,8 +224,8 @@ pub fn table_of_contents(src string) string {
 			body := t.trim_left('#').trim_left(' \t').trim_right(' #\t')
 			headings << Heading{
 				level: 2
-				text:  plain_inline(body)
-				slug:  slugify_heading(body)
+				text: plain_inline(body)
+				slug: slugify_heading(body)
 			}
 		}
 		i++
@@ -456,7 +456,7 @@ fn (mut r Renderer) blockquote(lines []string, start int) int {
 	return i
 }
 
-const callout_kinds = ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION']
+const callout_kinds = ['NOTE', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION']!
 
 fn parse_callout_marker(line string) ?(string, string) {
 	if !line.starts_with('[!') {
@@ -498,10 +498,8 @@ fn (mut r Renderer) list(lines []string, start int, ordered bool) int {
 			}
 			next := lines[i + 1]
 			if !(if ordered {
-				is_ol_marker(next)
-			} else {
-				is_ul_marker(next)
-			}) && !next.starts_with('  ') && !next.starts_with('\t') {
+				is_ol_marker(next)} else {
+				is_ul_marker(next)}) && !next.starts_with('  ') && !next.starts_with('\t') {
 				i++
 				break
 			}
@@ -563,8 +561,7 @@ fn (mut r Renderer) paragraph(lines []string, start int) int {
 		if l.trim_space() == '' {
 			break
 		}
-		if atx_level(l) != none || l.starts_with('```') || l.starts_with('~~~') || is_ul_marker(l)
-			|| is_ol_marker(l) || l.starts_with('> ') || is_hr(l.trim_space()) {
+		if atx_level(l) != none || l.starts_with('```') || l.starts_with('~~~') || is_ul_marker(l) || is_ol_marker(l) || l.starts_with('> ') || is_hr(l.trim_space()) {
 			break
 		}
 		if buf.len > 0 {
@@ -750,7 +747,6 @@ fn (mut r Renderer) html_block(lines []string, start int) int {
 }
 
 // ---- inline ----
-
 fn render_inline(src string, opts Options) string {
 	mut out := strings.new_builder(src.len)
 	bytes := src
@@ -880,8 +876,7 @@ fn render_inline(src string, opts Options) string {
 			`"` {
 				// SmartyPants: open quote at start/after whitespace, close otherwise.
 				prev := if i > 0 { bytes[i - 1] } else { ` ` }
-				if prev == ` ` || prev == `\n` || prev == `\t` || prev == `(` || prev == `[`
-					|| prev == 0 {
+				if prev == ` ` || prev == `\n` || prev == `\t` || prev == `(` || prev == `[` || prev == 0 {
 					out.write_string('&ldquo;')
 				} else {
 					out.write_string('&rdquo;')
@@ -924,8 +919,7 @@ fn render_inline(src string, opts Options) string {
 }
 
 fn is_punct(c u8) bool {
-	return (c >= 33 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96)
-		|| (c >= 123 && c <= 126)
+	return (c >= 33 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 126)
 }
 
 fn find_code_close(s string, start int) int {
@@ -935,7 +929,7 @@ fn find_code_close(s string, start int) int {
 		count++
 		i++
 	}
-	for j := i; j < s.len; {
+	for j := i; j < s.len;  {
 		if s[j] != `\`` {
 			j++
 			continue
@@ -1089,8 +1083,7 @@ fn html_tag_end(s string, start int) ?int {
 		return none
 	}
 	c := s[start + 1]
-	is_tag_start := c == `/` || c == `!` || c == `?` || (c >= `a` && c <= `z`)
-		|| (c >= `A` && c <= `Z`)
+	is_tag_start := c == `/` || c == `!` || c == `?` || (c >= `a` && c <= `z`) || (c >= `A` && c <= `Z`)
 	if !is_tag_start {
 		return none
 	}
@@ -1129,8 +1122,7 @@ fn resolve_url(url string, opts Options) string {
 	if opts.base_url == '' {
 		return url
 	}
-	if url.starts_with('http://') || url.starts_with('https://') || url.starts_with('mailto:')
-		|| url.starts_with('#') || url.starts_with('//') {
+	if url.starts_with('http://') || url.starts_with('https://') || url.starts_with('mailto:') || url.starts_with('#') || url.starts_with('//') {
 		return url
 	}
 	return opts.base_url.trim_right('/') + '/' + url.trim_left('/')
